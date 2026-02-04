@@ -5,7 +5,8 @@ import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { Spinner } from '@/components/ui/spinner';
-import { fetchGymBusyness, fetchGyms, type Gym } from '@/lib/api/basic-fit';
+import { fetchGymBusyness } from '@/lib/api/basic-fit';
+import { useGym } from '@/lib/context/gym-context';
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const FAVORITES_KEY = 'basicshare_favorite_gyms';
@@ -31,8 +32,7 @@ function getBusynessLevel(percentage: number) {
 
 export default function GymDetailPage() {
   const { slug } = useParams();
-  const [gym, setGym] = useState<Gym | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { gym, loading } = useGym(slug as string);
   const [favorites, setFavorites] = useState<string[]>([]);
   const [selectedDay, setSelectedDay] = useState(() => {
     const d = new Date().getDay();
@@ -48,11 +48,7 @@ export default function GymDetailPage() {
 
   useEffect(() => {
     setFavorites(getFavorites());
-    fetchGyms().then((gyms) => {
-      setGym(gyms.find((g) => g.clubId === slug) || null);
-      setLoading(false);
-    });
-  }, [slug]);
+  }, []);
 
   const toggleFavorite = () => {
     if (!gym) return;

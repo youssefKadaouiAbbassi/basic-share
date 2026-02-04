@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { ProtectedRoute } from '@/components/auth/protected-route';
 import { STORAGE_KEY } from '@/lib/constants';
+import { GymProvider } from '@/lib/context/gym-context';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
@@ -30,6 +31,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <ProtectedRoute>
+      <GymProvider>
       <div className="h-full w-full bg-zinc-950 flex flex-col overflow-hidden">
         {/* Header with Sign Out - static, doesn't re-render */}
         <header
@@ -136,6 +138,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
         </button>
       )}
+      </GymProvider>
     </ProtectedRoute>
   );
 }

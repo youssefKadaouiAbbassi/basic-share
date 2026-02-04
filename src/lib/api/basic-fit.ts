@@ -71,6 +71,28 @@ query GetGyms($limit: Int!) {
 }
 `;
 
+// Contentful GraphQL query for single gym
+const SINGLE_GYM_QUERY = `
+query GetGymByClubId($clubId: String!) {
+  clubCollection(where: { clubId: $clubId }, limit: 1) {
+    items {
+      sys { id }
+      clubId
+      name
+      displayName
+      address
+      city
+      country
+      location {
+        lat
+        lon
+      }
+      busynessData
+    }
+  }
+}
+`;
+
 // Fetch all gyms from Contentful
 export async function fetchGyms(): Promise<Gym[]> {
   const response = await fetch(
@@ -107,6 +129,42 @@ export async function fetchGyms(): Promise<Gym[]> {
     longitude: item.location?.lon || 0,
     busynessData: item.busynessData,
   }));
+}
+
+// Fetch single gym by clubId
+export async function fetchGymByClubId(clubId: string): Promise<Gym | null> {
+  const response = await fetch(
+    `https://graphql.contentful.com/content/v1/spaces/${CONTENTFUL_SPACE_ID}/environments/${CONTENTFUL_ENV}`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${CONTENTFUL_TOKEN}`,
+      },
+      body: JSON.stringify({
+        query: SINGLE_GYM_QUERY,
+        variables: { clubId },
+      }),
+    }
+  );
+
+  const data = await response.json();
+  const item = data.data?.clubCollection?.items?.[0] as ContentfulGymItem | undefined;
+
+  if (!item) return null;
+
+  return {
+    id: item.sys.id,
+    clubId: item.clubId,
+    name: item.name,
+    slug: item.clubId,
+    address: item.address || '',
+    city: item.city || '',
+    country: item.country || '',
+    latitude: item.location?.lat || 0,
+    longitude: item.location?.lon || 0,
+    busynessData: item.busynessData,
+  };
 }
 
 // Process busyness data from gym record

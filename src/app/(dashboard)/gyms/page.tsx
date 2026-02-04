@@ -1,15 +1,15 @@
 'use client';
 
 import { Heart } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Spinner } from '@/components/ui/spinner';
 import {
   fetchGymBusyness,
-  fetchGyms,
   formatDistance,
   type GymWithDistance,
   getNearbyGyms,
 } from '@/lib/api/basic-fit';
+import { useGyms } from '@/lib/context/gym-context';
 
 const FAVORITES_KEY = 'basicshare_favorite_gyms';
 
@@ -27,39 +27,36 @@ function saveFavorites(favorites: string[]) {
 }
 
 export default function GymsPage() {
-  const [gyms, setGyms] = useState<GymWithDistance[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { gyms: allGyms, loading } = useGyms();
   const [favorites, setFavorites] = useState<string[]>([]);
-
-  const loadGyms = useCallback(async (lat?: number, lon?: number) => {
-    setLoading(true);
-    try {
-      const allGyms = await fetchGyms();
-      if (lat && lon) {
-        setGyms(getNearbyGyms(allGyms, lat, lon, 50).slice(0, 30));
-      } else {
-        setGyms(
-          allGyms
-            .sort((a, b) => a.name.localeCompare(b.name))
-            .slice(0, 30)
-            .map((g) => ({ ...g, distance: 0 }))
-        );
-      }
-    } catch {
-      // Silent fail
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
+  const [locationLoading, setLocationLoading] = useState(true);
 
   useEffect(() => {
     setFavorites(getFavorites());
     navigator.geolocation?.getCurrentPosition(
-      (pos) => loadGyms(pos.coords.latitude, pos.coords.longitude),
-      () => loadGyms(),
+      (pos) => {
+        setUserLocation({ lat: pos.coords.latitude, lon: pos.coords.longitude });
+        setLocationLoading(false);
+      },
+      () => setLocationLoading(false),
       { timeout: 5000 }
     );
-  }, [loadGyms]);
+  }, []);
+
+  // Process gyms with distance
+  const gyms: GymWithDistance[] = useMemo(() => {
+    if (allGyms.length === 0) return [];
+
+    if (userLocation) {
+      return getNearbyGyms(allGyms, userLocation.lat, userLocation.lon, 50).slice(0, 30);
+    }
+
+    return allGyms
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .slice(0, 30)
+      .map((g) => ({ ...g, distance: 0 }));
+  }, [allGyms, userLocation]);
 
   const toggleFavorite = (clubId: string, e: React.MouseEvent) => {
     e.preventDefault();
@@ -74,15 +71,17 @@ export default function GymsPage() {
   };
 
   // Sort: favorites first, then by distance
-  const sortedGyms = [...gyms].sort((a, b) => {
-    const aFav = favorites.includes(a.clubId);
-    const bFav = favorites.includes(b.clubId);
-    if (aFav && !bFav) return -1;
-    if (!aFav && bFav) return 1;
-    return a.distance - b.distance;
-  });
+  const sortedGyms = useMemo(() => {
+    return [...gyms].sort((a, b) => {
+      const aFav = favorites.includes(a.clubId);
+      const bFav = favorites.includes(b.clubId);
+      if (aFav && !bFav) return -1;
+      if (!aFav && bFav) return 1;
+      return a.distance - b.distance;
+    });
+  }, [gyms, favorites]);
 
-  if (loading) {
+  if (loading || locationLoading) {
     return (
       <div className="h-full flex items-center justify-center">
         <Spinner size="lg" />
