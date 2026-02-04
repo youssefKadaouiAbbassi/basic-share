@@ -4,6 +4,7 @@ import { ArrowLeft, Heart } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { OfflineBanner } from '@/components/ui/offline-banner';
 import { Spinner } from '@/components/ui/spinner';
 import { fetchGymBusyness } from '@/lib/api/basic-fit';
 import { useGym } from '@/lib/context/gym-context';
@@ -113,6 +114,7 @@ export default function GymDetailPage() {
 
   return (
     <div className="h-full flex flex-col overflow-y-auto">
+      <OfflineBanner />
       {/* Back */}
       <div className="px-6 pt-6 pb-3">
         <a href="/gyms" className="inline-flex items-center gap-1.5 text-zinc-400 hover:text-white text-sm transition-colors">

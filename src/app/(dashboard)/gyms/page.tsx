@@ -2,6 +2,7 @@
 
 import { Clock, Heart } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
+import { OfflineBanner } from '@/components/ui/offline-banner';
 import { Spinner } from '@/components/ui/spinner';
 import {
   fetchGymBusyness,
@@ -42,10 +43,18 @@ export default function GymsPage() {
   const [recent, setRecent] = useState<string[]>([]);
   const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
   const [locationLoading, setLocationLoading] = useState(true);
+  const [isOffline, setIsOffline] = useState(false);
 
   useEffect(() => {
     setFavorites(getFavorites());
     setRecent(getRecent());
+
+    // Online/offline detection
+    const updateOnlineStatus = () => setIsOffline(!navigator.onLine);
+    updateOnlineStatus();
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
+
     navigator.geolocation?.getCurrentPosition(
       (pos) => {
         setUserLocation({ lat: pos.coords.latitude, lon: pos.coords.longitude });
@@ -54,6 +63,11 @@ export default function GymsPage() {
       () => setLocationLoading(false),
       { timeout: 5000 }
     );
+
+    return () => {
+      window.removeEventListener('online', updateOnlineStatus);
+      window.removeEventListener('offline', updateOnlineStatus);
+    };
   }, []);
 
   // Process gyms with distance
@@ -113,8 +127,15 @@ export default function GymsPage() {
   }
 
   return (
-    <div className="h-full flex flex-col px-4 py-2 overflow-hidden">
-      <div className="flex-1 overflow-y-auto">
+    <div className="h-full flex flex-col overflow-hidden">
+      <OfflineBanner />
+      {isOffline && gyms.length === 0 && !loading && (
+        <div className="flex-1 flex items-center justify-center px-4">
+          <p className="text-zinc-500 text-sm text-center">Gyms will appear when you&apos;re back online</p>
+        </div>
+      )}
+      {(!isOffline || gyms.length > 0) && (
+        <div className="flex-1 overflow-y-auto px-4 py-2">
         {recentGyms.length > 0 && (
           <>
             <div className="flex items-center gap-2 mb-3 mt-1">
@@ -195,7 +216,8 @@ export default function GymsPage() {
             </a>
           );
         })}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
