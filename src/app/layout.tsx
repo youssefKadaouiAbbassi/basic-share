@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
-import { ServiceWorkerRegister } from '@/components/ServiceWorkerRegister';
+import { SerwistProvider } from '@/components/serwist-provider';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -82,8 +82,9 @@ export default function RootLayout({
         <link rel="apple-touch-startup-image" href="/splash-1284x2778.png" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3)" />
       </head>
       <body className={`${inter.variable} font-sans antialiased bg-zinc-950 text-white`}>
-        <ServiceWorkerRegister />
-        {children}
+        <SerwistProvider swUrl="/serwist/sw.js">
+          {children}
+        </SerwistProvider>
       </body>
     </html>
   );
