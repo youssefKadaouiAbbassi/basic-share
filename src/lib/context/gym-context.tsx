@@ -4,13 +4,13 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import {
   calculateDistance,
   fetchGymByClubId,
-  fetchNearbyGymsFromApi,
+  fetchGyms,
   type Gym,
   type GymWithDistance,
 } from '@/lib/api/basic-fit';
 
 const CACHE_KEY = 'basicshare_gyms_cache';
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours - gym locations rarely change
 
 // Default location (Paris) for users who deny geolocation
 const DEFAULT_LOCATION = { lat: 48.8566, lon: 2.3522 };
@@ -31,26 +31,15 @@ interface GymContextValue {
 
 const GymContext = createContext<GymContextValue | null>(null);
 
-function getCache(lat: number, lon: number): CacheData | null {
+function getCache(): CacheData | null {
   if (typeof window === 'undefined') return null;
   try {
     const cached = localStorage.getItem(CACHE_KEY);
     if (!cached) return null;
     const parsed = JSON.parse(cached) as CacheData;
 
-    // Check TTL
+    // Check TTL only - gym locations don't change often
     if (Date.now() - parsed.timestamp > CACHE_TTL) {
-      localStorage.removeItem(CACHE_KEY);
-      return null;
-    }
-
-    // Check if location is close enough (within 5km of cached location)
-    const distance = Math.sqrt(
-      Math.pow(parsed.location.lat - lat, 2) + Math.pow(parsed.location.lon - lon, 2)
-    ) * 111; // rough km conversion
-
-    if (distance > 5) {
-      // Location changed significantly, invalidate cache
       localStorage.removeItem(CACHE_KEY);
       return null;
     }
@@ -80,34 +69,31 @@ export function GymProvider({ children }: { children: React.ReactNode }) {
     setLoading(true);
     setError(null);
 
-    // Check cache first
-    if (useCache) {
-      const cached = getCache(lat, lon);
+    // Check cache first - we cache all gyms for 24h since locations rarely change
+    const cached = useCache ? getCache() : null;
+
+    try {
+      let allGyms: Gym[];
+
       if (cached) {
-        // Add distance to cached gyms
-        const gymsWithDistance = cached.data.map((gym) => ({
+        allGyms = cached.data;
+      } else {
+        // Fetch all gyms (cached for 24 hours - locations rarely change)
+        allGyms = await fetchGyms();
+        setCache(allGyms, { lat, lon });
+      }
+
+      // Filter by distance and add distance field
+      const gymsWithDistance = allGyms
+        .map((gym) => ({
           ...gym,
           distance: calculateDistance(lat, lon, gym.latitude, gym.longitude),
-        })).sort((a, b) => a.distance - b.distance);
-
-        setGyms(gymsWithDistance);
-        setLoading(false);
-        return;
-      }
-    }
-
-    // Fetch nearby gyms (FAST - only ~30-50 gyms instead of 2000)
-    try {
-      const data = await fetchNearbyGymsFromApi(lat, lon, 50, 50);
-
-      // Add distance and sort
-      const gymsWithDistance = data.map((gym) => ({
-        ...gym,
-        distance: calculateDistance(lat, lon, gym.latitude, gym.longitude),
-      })).sort((a, b) => a.distance - b.distance);
+        }))
+        .filter((gym) => gym.distance <= 50) // Within 50km
+        .sort((a, b) => a.distance - b.distance)
+        .slice(0, 50); // Top 50 nearest
 
       setGyms(gymsWithDistance);
-      setCache(data, { lat, lon });
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Failed to fetch gyms'));
     } finally {
