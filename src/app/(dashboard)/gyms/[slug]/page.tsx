@@ -79,7 +79,7 @@ export default function GymDetailPage() {
 
       {/* Header */}
       <div className="px-6 pb-6">
-        <h1 className="text-2xl font-bold text-white mb-1">{gym.name}</h1>
+        <h1 className="text-2xl font-bold text-white mb-1">{gym.name.replace(/^Basic-Fit\s*/i, '')}</h1>
         <p className="text-zinc-400 text-sm">{gym.address}, {gym.city}</p>
       </div>
 
