@@ -11,7 +11,6 @@ import { useGym } from '@/lib/context/gym-context';
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const FAVORITES_KEY = 'basicshare_favorite_gyms';
-const RECENT_KEY = 'basicshare_recent_gyms';
 const DEFAULT_GYM_KEY = 'basicshare_default_gym';
 
 function getFavorites(): string[] {
@@ -25,18 +24,6 @@ function getFavorites(): string[] {
 
 function saveFavorites(favorites: string[]) {
   localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
-}
-
-function saveRecent(clubId: string) {
-  if (typeof window === 'undefined') return;
-  try {
-    const current = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]') as string[];
-    const filtered = current.filter((id) => id !== clubId);
-    const updated = [clubId, ...filtered].slice(0, 3);
-    localStorage.setItem(RECENT_KEY, JSON.stringify(updated));
-  } catch {
-    // Ignore errors
-  }
 }
 
 function getDefaultGym(): string | null {
@@ -84,12 +71,6 @@ export default function GymDetailPage() {
     setFavorites(getFavorites());
     setDefaultGymState(getDefaultGym());
   }, []);
-
-  useEffect(() => {
-    if (gym) {
-      saveRecent(gym.clubId);
-    }
-  }, [gym]);
 
   const toggleFavorite = () => {
     if (!gym) return;
