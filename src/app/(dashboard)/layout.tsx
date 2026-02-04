@@ -1,12 +1,14 @@
 'use client';
 
-import { LogOut } from 'lucide-react';
+import { LogOut, MapPin, QrCode } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { ProtectedRoute } from '@/components/auth/protected-route';
 import { STORAGE_KEY } from '@/lib/constants';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     if (!showLogoutConfirm) return;
@@ -60,6 +62,38 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </header>
         {/* Content area - flex-1 takes remaining space, contained within viewport */}
         <main className="flex-1 min-h-0 overflow-hidden">{children}</main>
+        {/* Bottom Navigation */}
+        <nav
+          className="relative z-10 flex-shrink-0 bg-zinc-950"
+          style={{
+            paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))',
+            paddingLeft: 'env(safe-area-inset-left)',
+            paddingRight: 'env(safe-area-inset-right)',
+          }}
+        >
+          <div className="flex items-center justify-around">
+            <a
+              href="/qrcode"
+              className={`flex-1 flex flex-col items-center gap-0.5 py-2 transition-colors ${
+                pathname === '/qrcode' ? 'text-orange-500' : 'text-zinc-500 hover:text-zinc-400'
+              }`}
+            >
+              <QrCode className="w-5 h-5" strokeWidth={2} />
+              <span className="text-[9px] font-normal">QR Code</span>
+            </a>
+            <a
+              href="/gyms"
+              className={`flex-1 flex flex-col items-center gap-0.5 py-2 transition-colors ${
+                pathname?.startsWith('/gyms')
+                  ? 'text-orange-500'
+                  : 'text-zinc-500 hover:text-zinc-400'
+              }`}
+            >
+              <MapPin className="w-5 h-5" strokeWidth={2} />
+              <span className="text-[9px] font-normal">Gyms</span>
+            </a>
+          </div>
+        </nav>
       </div>
       {showLogoutConfirm && (
         <button

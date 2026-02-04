@@ -1,11 +1,18 @@
 'use client';
 
-import { Pause, RefreshCw } from 'lucide-react';
+import { CheckCircle, Pause, RefreshCw, XCircle } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { useCallback, useEffect, useState } from 'react';
 import PWAInstallPrompt from '@/components/pwa-install-prompt';
 import { Spinner } from '@/components/ui/spinner';
-import { QR_ERROR_LEVEL, QR_REFRESH_INTERVAL, QR_SIZE, STORAGE_KEY } from '@/lib/constants';
+import { type AccessResult, checkAccessResult } from '@/lib/api/basic-fit';
+import {
+  ACCESS_CHECK_INTERVAL,
+  QR_ERROR_LEVEL,
+  QR_REFRESH_INTERVAL,
+  QR_SIZE,
+  STORAGE_KEY,
+} from '@/lib/constants';
 
 interface AuthData {
   cardNumber: string;
@@ -13,13 +20,18 @@ interface AuthData {
   persistentGuid: string;
 }
 
-async function generateHash(cardNumber: string, guid: string, time: number, deviceId: string): Promise<string> {
+async function generateHash(
+  cardNumber: string,
+  guid: string,
+  time: number,
+  deviceId: string
+): Promise<string> {
   const input = `${cardNumber}${guid}${time}${deviceId}`;
   const encoder = new TextEncoder();
   const data = encoder.encode(input);
   const hashBuffer = await crypto.subtle.digest('SHA-256', data);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
-  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  const hashHex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
   // Return last 8 characters uppercase (matches reference implementation)
   return hashHex.slice(-8).toUpperCase();
 }
@@ -47,6 +59,7 @@ export default function QRCodeContent() {
   const [isVisible, setIsVisible] = useState(true);
   const [mounted, setMounted] = useState(false);
   const [animationKey, setAnimationKey] = useState(0);
+  const [accessResult, setAccessResult] = useState<AccessResult | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -72,7 +85,11 @@ export default function QRCodeContent() {
   // Generate QR code function
   const generate = useCallback(async () => {
     if (!authData) return;
-    const qr = await generateQRData(authData.cardNumber, authData.deviceId, authData.persistentGuid);
+    const qr = await generateQRData(
+      authData.cardNumber,
+      authData.deviceId,
+      authData.persistentGuid
+    );
     setQrData(qr);
     setAnimationKey((prev) => prev + 1);
   }, [authData]);
@@ -87,6 +104,25 @@ export default function QRCodeContent() {
     const interval = setInterval(generate, QR_REFRESH_INTERVAL);
     return () => clearInterval(interval);
   }, [authData, isVisible, generate]);
+
+  // Check access result periodically
+  useEffect(() => {
+    if (!authData || !isVisible) return;
+
+    const checkAccess = async () => {
+      try {
+        const result = await checkAccessResult(authData.cardNumber);
+        setAccessResult(result);
+      } catch {
+        // Silent fail - access check is optional
+      }
+    };
+
+    // Check immediately and then periodically
+    checkAccess();
+    const interval = setInterval(checkAccess, ACCESS_CHECK_INTERVAL);
+    return () => clearInterval(interval);
+  }, [authData, isVisible]);
 
   if (!authData) {
     return (
@@ -231,6 +267,40 @@ export default function QRCodeContent() {
               )}
             </div>
           </div>
+
+          {/* Last scan status */}
+          {accessResult && (
+            <div
+              className={`mt-4 p-3 rounded-xl border ${
+                accessResult.success
+                  ? 'bg-emerald-500/10 border-emerald-500/20'
+                  : 'bg-zinc-900/60 border-zinc-800'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                {accessResult.success ? (
+                  <CheckCircle className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+                ) : (
+                  <XCircle className="w-4 h-4 text-zinc-500 flex-shrink-0" />
+                )}
+                <div className="min-w-0 flex-1">
+                  <p
+                    className={`text-sm font-medium ${accessResult.success ? 'text-emerald-400' : 'text-zinc-400'}`}
+                  >
+                    {accessResult.success ? 'Entry Granted' : 'No recent scan'}
+                  </p>
+                  {accessResult.gymName && (
+                    <p className="text-xs text-zinc-500 truncate">{accessResult.gymName}</p>
+                  )}
+                  {accessResult.timestamp && (
+                    <p className="text-[10px] text-zinc-600 mt-0.5">
+                      {new Date(accessResult.timestamp).toLocaleTimeString()}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </main>
 

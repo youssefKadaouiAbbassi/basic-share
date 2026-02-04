@@ -18,3 +18,18 @@ export const CARD_NUMBER_MIN_LENGTH = 6;
 // UI constants
 export const SPINNER_SIZE = 8;
 export const TOAST_DURATION = 3000;
+
+// Basic-Fit API
+export const CONTENTFUL_TOKEN = 'wRd4zwNule_XU0IrbE-DSfF0IcFxSnDCilyboUhYLps';
+export const CONTENTFUL_SPACE_ID = 'ztnn01luatek';
+export const CONTENTFUL_ENV = 'master';
+export const BASIC_FIT_API_BASE = 'https://my.basic-fit.com/door-policy';
+
+// Gym data refresh intervals (ms)
+export const GYM_REFRESH_INTERVAL = 60000; // 1 minute
+export const ACCESS_CHECK_INTERVAL = 30000; // 30 seconds
+export const BUSYNESS_REFRESH_INTERVAL = 300000; // 5 minutes
+
+// Geolocation
+export const DEFAULT_SEARCH_RADIUS_KM = 50;
+export const MAX_NEARBY_GYMS = 20;
