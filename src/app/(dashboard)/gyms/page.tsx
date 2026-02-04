@@ -95,10 +95,16 @@ function GymsListContent() {
   const [locationLoading, setLocationLoading] = useState(true);
   const [isOffline, setIsOffline] = useState(false);
 
-  // Initialize with cached gyms for instant display
-  const [displayGyms, setDisplayGyms] = useState<GymWithDistance[]>(() => getCachedGyms());
+  // Initialize with SSR-safe default
+  const [displayGyms, setDisplayGyms] = useState<GymWithDistance[]>([]);
 
   useEffect(() => {
+    // Load cached gyms after mount
+    const cached = getCachedGyms();
+    if (cached.length > 0) {
+      setDisplayGyms(cached);
+    }
+
     setFavorites(getFavorites());
 
     // Clean up old prefetch data on mount

@@ -63,18 +63,24 @@ function setCache(data: Gym[], location: { lat: number; lon: number }) {
 }
 
 export function GymProvider({ children }: { children: React.ReactNode }) {
-  // Initialize with cached data if available - no loading spinner needed
-  const [gyms, setGyms] = useState<GymWithDistance[]>(() => {
-    const cached = getCache();
-    if (cached) {
-      // Show cached gyms immediately with placeholder distances
-      return cached.data.slice(0, 50).map((gym) => ({ ...gym, distance: 0 }));
-    }
-    return [];
-  });
-  const [loading, setLoading] = useState(() => !getCache()); // Only loading if no cache
+  // Initialize with SSR-safe defaults
+  const [gyms, setGyms] = useState<GymWithDistance[]>([]);
+  const [loading, setLoading] = useState(true); // Always start loading
   const [error, setError] = useState<Error | null>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
+
+  // Load from cache after mount
+  useEffect(() => {
+    const cached = getCache();
+    if (cached) {
+      const gymsWithDistance = cached.data.slice(0, 50).map((gym) => ({
+        ...gym,
+        distance: 0,
+      }));
+      setGyms(gymsWithDistance);
+      setLoading(false);
+    }
+  }, []);
 
   const loadGyms = useCallback(async (lat: number, lon: number, useCache = true) => {
     // Check cache first - we cache all gyms for 24h since locations rarely change
