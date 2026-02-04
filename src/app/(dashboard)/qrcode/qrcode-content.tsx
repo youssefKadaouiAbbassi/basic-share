@@ -161,8 +161,9 @@ export default function QRCodeContent() {
           </div>
         </div>
         <button
+          type="button"
           onClick={handleLogout}
-          className="flex items-center gap-1.5 sm:gap-2 text-zinc-500 hover:text-white active:text-zinc-300 transition-colors px-2 sm:px-3 py-2 sm:py-2.5 -mr-2 sm:-mr-3 rounded-xl min-h-[44px]"
+          className="flex items-center justify-center gap-1.5 sm:gap-2 text-zinc-500 hover:text-white active:text-zinc-300 active:scale-95 transition-all px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl min-h-[44px] min-w-[44px] touch-manipulation"
         >
           <LogOut className="w-[18px] h-[18px]" strokeWidth={2.25} />
           <span className="text-xs sm:text-sm font-medium">Sign Out</span>
