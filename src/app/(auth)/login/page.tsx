@@ -9,6 +9,7 @@ export default function LoginPage() {
   const [cardNumber, setCardNumber] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [inputFocused, setInputFocused] = useState(false);
 
@@ -47,7 +48,10 @@ export default function LoginPage() {
       };
 
       localStorage.setItem(STORAGE_KEY, JSON.stringify(authData));
-      window.location.assign('/qrcode');
+      setSuccess(true);
+      setTimeout(() => {
+        window.location.assign('/qrcode');
+      }, 300);
     } catch (err) {
       console.error('Error:', err);
       setError('Something went wrong');
@@ -158,14 +162,23 @@ export default function LoginPage() {
               onClick={handleSubmit}
               disabled={isLoading || !cardNumber.trim()}
               aria-label="Continue to generate QR code"
-              className="w-full py-[18px] px-6 rounded-2xl bg-gradient-to-b from-orange-500 to-orange-600 text-white font-semibold text-[17px] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-orange-500/25 active:scale-[0.98] hover:shadow-xl hover:shadow-orange-500/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 relative overflow-hidden mt-2"
+              className="w-full py-[18px] px-6 rounded-2xl bg-gradient-to-b from-orange-500 to-orange-600 text-white font-semibold text-[17px] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-orange-500/25 active:scale-[0.98] hover:shadow-xl hover:shadow-orange-500/30 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 relative overflow-hidden mt-2"
             >
               <span className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" aria-hidden="true" />
               {isLoading ? (
-                <span className="flex items-center justify-center gap-3">
-                  <Spinner size="sm" className="border-white/30 border-t-white" />
-                  <span>Signing in...</span>
-                </span>
+                success ? (
+                  <span className="flex items-center justify-center gap-3">
+                    <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span>Success!</span>
+                  </span>
+                ) : (
+                  <span className="flex items-center justify-center gap-3">
+                    <Spinner size="sm" className="border-white/30 border-t-white" />
+                    <span>Signing in...</span>
+                  </span>
+                )
               ) : (
                 'Continue'
               )}

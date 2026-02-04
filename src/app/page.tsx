@@ -79,7 +79,7 @@ export default function Home() {
         <a
           href="/login"
           aria-label="Get started with BasicShare"
-          className="group w-full flex items-center justify-center gap-2 py-[18px] px-6 rounded-2xl bg-gradient-to-b from-orange-500 to-orange-600 text-white font-semibold text-[17px] transition-all duration-200 shadow-lg shadow-orange-500/30 active:scale-[0.98] active:shadow-orange-500/20 hover:shadow-xl hover:shadow-orange-500/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 relative overflow-hidden"
+          className="group w-full flex items-center justify-center gap-2 py-[18px] px-6 rounded-2xl bg-gradient-to-b from-orange-500 to-orange-600 text-white font-semibold text-[17px] transition-all duration-200 shadow-lg shadow-orange-500/30 active:scale-[0.98] active:shadow-orange-500/20 hover:shadow-xl hover:shadow-orange-500/35 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 relative overflow-hidden"
         >
           {/* Subtle top highlight */}
           <span className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" aria-hidden="true" />

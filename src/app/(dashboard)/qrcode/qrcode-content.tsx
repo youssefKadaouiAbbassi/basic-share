@@ -134,32 +134,44 @@ export default function QRCodeContent() {
             <div className="absolute -inset-3 sm:-inset-4 bg-orange-500/15 rounded-[1.75rem] sm:rounded-[2.5rem] blur-2xl" />
 
             {/* QR Card */}
-            <div className="relative bg-white rounded-2xl sm:rounded-[2rem] p-4 sm:p-6 shadow-2xl shadow-black/50">
+            <div className="relative bg-[#fefdfb] rounded-2xl sm:rounded-[2rem] p-4 sm:p-6 shadow-2xl shadow-black/40">
               {/* Inner border highlight */}
               <div className="absolute inset-[1px] rounded-[calc(1rem-1px)] sm:rounded-[calc(2rem-1px)] border border-black/5 pointer-events-none" />
 
-              {/* QR Code */}
-              <div className="relative">
-                {qrData ? (
-                  <QRCodeSVG
-                    value={qrData}
-                    size={QR_SIZE}
-                    level={QR_ERROR_LEVEL}
-                    className="w-full h-auto"
-                    bgColor="#ffffff"
-                    fgColor="#09090b"
-                  />
-                ) : (
-                  <div className="w-full aspect-square flex items-center justify-center">
-                    <Spinner size="lg" />
-                  </div>
-                )}
+              {/* QR Code with cross-fade transition */}
+              <div className="relative aspect-square">
+                {/* Spinner layer - fades out when QR ready */}
+                <div
+                  className={`absolute inset-0 flex items-center justify-center transition-opacity duration-300 ${
+                    qrData ? 'opacity-0 pointer-events-none' : 'opacity-100'
+                  }`}
+                >
+                  <Spinner size="lg" />
+                </div>
+                {/* QR layer - fades in when ready */}
+                <div
+                  key={animationKey}
+                  className={`transition-opacity duration-300 animate-qr-refresh ${
+                    qrData ? 'opacity-100' : 'opacity-0'
+                  }`}
+                >
+                  {qrData && (
+                    <QRCodeSVG
+                      value={qrData}
+                      size={QR_SIZE}
+                      level={QR_ERROR_LEVEL}
+                      className="w-full h-auto"
+                      bgColor="#fefdfb"
+                      fgColor="#09090b"
+                    />
+                  )}
+                </div>
               </div>
             </div>
           </div>
 
           {/* Card info panel */}
-          <div className="bg-zinc-900/70 backdrop-blur-xl border border-zinc-800/80 rounded-xl sm:rounded-2xl px-4 sm:px-5 py-3 sm:py-4 mb-4 sm:mb-5">
+          <div className="bg-zinc-900/70 backdrop-blur-xl border border-zinc-800/80 rounded-xl sm:rounded-2xl px-4 sm:px-5 py-3 sm:py-4 mb-4 sm:mb-5 hover:bg-zinc-900/90 hover:border-zinc-700/80 transition-colors cursor-default">
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0 flex-1">
                 <p className="text-zinc-500 text-[10px] sm:text-xs font-medium uppercase tracking-wider mb-0.5 sm:mb-1">

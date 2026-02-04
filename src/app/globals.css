@@ -158,3 +158,21 @@
 .progress-bar-gradient {
   background: var(--gradient-progress);
 }
+
+/* QR Code Animations */
+@keyframes qr-refresh {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+.animate-qr-refresh {
+  animation: qr-refresh 0.3s ease-out;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
