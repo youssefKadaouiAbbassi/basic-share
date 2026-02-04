@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import {
   calculateDistance,
   detectCountryFromCoords,
@@ -69,8 +69,8 @@ export function GymProvider({ children }: { children: React.ReactNode }) {
   const [error, setError] = useState<Error | null>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
 
-  // Load from cache after mount
-  useEffect(() => {
+  // Load from cache BEFORE paint - no flash
+  useLayoutEffect(() => {
     const cached = getCache();
     if (cached) {
       const gymsWithDistance = cached.data.slice(0, 50).map((gym) => ({
@@ -168,7 +168,8 @@ export function useGym(clubId: string) {
   const [gym, setGym] = useState<Gym | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  // Use useLayoutEffect to read prefetch BEFORE paint - no flash
+  useLayoutEffect(() => {
     // Step 1: Check for prefetched data first (instant load)
     if (typeof window !== 'undefined') {
       try {
