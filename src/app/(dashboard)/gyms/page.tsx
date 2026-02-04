@@ -151,7 +151,11 @@ function GymsListContent() {
     });
   }, [gyms, favorites]);
 
-  if (loading || locationLoading) {
+  // Show content immediately if we have gyms (even if location is still loading)
+  // Location loading will update distances in the background
+  const showSpinner = loading && gyms.length === 0;
+
+  if (showSpinner) {
     return (
       <div className="h-full flex items-center justify-center">
         <Spinner size="lg" />

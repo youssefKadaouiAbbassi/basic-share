@@ -63,8 +63,16 @@ function setCache(data: Gym[], location: { lat: number; lon: number }) {
 }
 
 export function GymProvider({ children }: { children: React.ReactNode }) {
-  const [gyms, setGyms] = useState<GymWithDistance[]>([]);
-  const [loading, setLoading] = useState(true);
+  // Initialize with cached data if available - no loading spinner needed
+  const [gyms, setGyms] = useState<GymWithDistance[]>(() => {
+    const cached = getCache();
+    if (cached) {
+      // Show cached gyms immediately with placeholder distances
+      return cached.data.slice(0, 50).map((gym) => ({ ...gym, distance: 0 }));
+    }
+    return [];
+  });
+  const [loading, setLoading] = useState(() => !getCache()); // Only loading if no cache
   const [error, setError] = useState<Error | null>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
 
