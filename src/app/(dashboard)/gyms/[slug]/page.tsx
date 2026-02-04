@@ -5,7 +5,6 @@ import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { OfflineBanner } from '@/components/ui/offline-banner';
-import { Spinner } from '@/components/ui/spinner';
 import { fetchGymBusyness } from '@/lib/api/basic-fit';
 import { useGym } from '@/lib/context/gym-context';
 
@@ -93,12 +92,11 @@ export default function GymDetailPage() {
   const isFavorite = gym ? favorites.includes(gym.clubId) : false;
   const isDefault = gym ? defaultGym === gym.clubId : false;
 
-  // Only show spinner if we have no gym data at all AND still loading
-  // If we have gym data (from prefetch or cache), show it immediately
+  // Show loading message instead of spinner
   if (loading && !gym) {
     return (
       <div className="h-full flex items-center justify-center">
-        <Spinner size="lg" />
+        <p className="text-zinc-500 text-sm">Loading gym details...</p>
       </div>
     );
   }

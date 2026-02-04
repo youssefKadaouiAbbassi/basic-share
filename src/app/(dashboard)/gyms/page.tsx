@@ -4,7 +4,6 @@ import { Heart } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { OfflineBanner } from '@/components/ui/offline-banner';
-import { Spinner } from '@/components/ui/spinner';
 import {
   fetchGymBusyness,
   fetchGymByClubId,
@@ -69,9 +68,10 @@ function RedirectToDefaultGym({ gymId }: { gymId: string }) {
     prefetchAndRedirect();
   }, [gymId]);
 
+  // Show minimal content while redirecting - no spinner
   return (
     <div className="h-full flex items-center justify-center">
-      <Spinner size="lg" />
+      <p className="text-zinc-500 text-sm">Redirecting...</p>
     </div>
   );
 }
@@ -152,24 +152,17 @@ function GymsListContent() {
     });
   }, [gyms, favorites]);
 
-  // Show content immediately if we have gyms (even if location is still loading)
-  // Only show spinner if truly no data and still loading
-  const showSpinner = loading && gyms.length === 0;
-
-  if (showSpinner) {
-    return (
-      <div className="h-full flex items-center justify-center">
-        <Spinner size="lg" />
-      </div>
-    );
-  }
-
   return (
     <div className="h-full flex flex-col overflow-hidden">
       <OfflineBanner />
       {isOffline && gyms.length === 0 && !loading && (
         <div className="flex-1 flex items-center justify-center px-4">
           <p className="text-zinc-500 text-sm text-center">Gyms will appear when you&apos;re back online</p>
+        </div>
+      )}
+      {!isOffline && gyms.length === 0 && loading && (
+        <div className="flex-1 flex items-center justify-center px-4">
+          <p className="text-zinc-500 text-sm text-center">Loading gyms...</p>
         </div>
       )}
       {(!isOffline || gyms.length > 0) && (
