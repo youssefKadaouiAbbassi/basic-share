@@ -259,7 +259,9 @@ export function fetchGymBusyness(
   // Convert object format to array format
   const hourlyData: Record<string, number[]> = {};
   for (const [day, hours] of Object.entries(busynessData)) {
-    hourlyData[day] = Array.from({ length: 24 }, (_, i) => hours[String(i)] || 0);
+    if (hours && typeof hours === 'object') {
+      hourlyData[day] = Array.from({ length: 24 }, (_, i) => hours[String(i)] || 0);
+    }
   }
 
   const todayData = hourlyData[today] || [];
