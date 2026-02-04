@@ -26,7 +26,7 @@ BasicShare - Generate Basic-Fit gym QR codes. A lightweight Progressive Web App 
 - **UI**: [React 19](https://react.dev)
 - **Styling**: [Tailwind CSS 4](https://tailwindcss.com)
 - **Language**: [TypeScript](https://www.typescriptlang.org)
-- **PWA**: [Serwist](https://serwist.pages.dev)
+- **PWA**: [Serwist](https://serwist.pages.dev) (with Turbopack)
 - **QR Codes**: [qrcode.react](https://www.npmjs.com/package/qrcode.react)
 - **Icons**: [Lucide React](https://lucide.dev)
 
@@ -116,20 +116,21 @@ bun run check    # Check and fix code issues
 basic-share/
 ├── src/
 │   ├── app/
-│   │   ├── layout.tsx           # Root layout
+│   │   ├── layout.tsx           # Root layout with SerwistProvider
 │   │   ├── page.tsx             # Landing page
 │   │   ├── manifest.ts          # PWA manifest
-│   │   ├── sw.ts                # Service worker
+│   │   ├── sw.ts                # Service worker source
+│   │   ├── serwist/[path]/      # Service worker route handler
 │   │   ├── (auth)/login/        # Login page
 │   │   └── (dashboard)/qrcode/  # QR code display
 │   ├── components/
 │   │   ├── auth/                # Authentication components
-│   │   └── ServiceWorkerRegister.tsx
+│   │   ├── serwist-provider.tsx # PWA provider component
+│   │   └── pwa-install-prompt.tsx
 │   └── lib/
 │       └── constants.ts         # App constants
-├── public/                      # Static assets
-├── tailwind.config.ts           # Tailwind configuration
-├── next.config.ts               # Next.js configuration
+├── public/                      # Static assets & splash screens
+├── next.config.ts               # Next.js + Serwist config
 └── tsconfig.json                # TypeScript configuration
 ```
 
