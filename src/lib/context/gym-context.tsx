@@ -77,11 +77,14 @@ export function GymProvider({ children }: { children: React.ReactNode }) {
   const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
 
   const loadGyms = useCallback(async (lat: number, lon: number, useCache = true) => {
-    setLoading(true);
-    setError(null);
-
     // Check cache first - we cache all gyms for 24h since locations rarely change
     const cached = useCache ? getCache() : null;
+
+    // Only show loading spinner if we don't have cached data
+    if (!cached) {
+      setLoading(true);
+    }
+    setError(null);
 
     try {
       let allGyms: Gym[];
