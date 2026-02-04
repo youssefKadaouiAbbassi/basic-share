@@ -6,6 +6,7 @@ import { OfflineBanner } from '@/components/ui/offline-banner';
 import { Spinner } from '@/components/ui/spinner';
 import {
   fetchGymBusyness,
+  fetchGymByClubId,
   formatDistance,
   type GymWithDistance,
   getNearbyGyms,
@@ -15,6 +16,7 @@ import { useGyms } from '@/lib/context/gym-context';
 const FAVORITES_KEY = 'basicshare_favorite_gyms';
 const RECENT_KEY = 'basicshare_recent_gyms';
 const DEFAULT_GYM_KEY = 'basicshare_default_gym';
+const PREFETCH_KEY = 'basicshare_prefetched_gym';
 
 function getFavorites(): string[] {
   if (typeof window === 'undefined') return [];
@@ -50,7 +52,30 @@ function getDefaultGymSync(): string | null {
 // Simple redirect component that doesn't trigger gym fetching
 function RedirectToDefaultGym({ gymId }: { gymId: string }) {
   useEffect(() => {
-    window.location.href = `/gyms/${gymId}`;
+    // Prefetch gym data before redirecting
+    const prefetchAndRedirect = async () => {
+      try {
+        const gymData = await fetchGymByClubId(gymId);
+        if (gymData) {
+          // Store prefetched data for the detail page to use
+          localStorage.setItem(
+            PREFETCH_KEY,
+            JSON.stringify({
+              data: gymData,
+              timestamp: Date.now(),
+            })
+          );
+        }
+      } catch (error) {
+        // Ignore prefetch errors, redirect anyway
+        console.error('Prefetch failed:', error);
+      } finally {
+        // Redirect after prefetch (or on error)
+        window.location.href = `/gyms/${gymId}`;
+      }
+    };
+
+    prefetchAndRedirect();
   }, [gymId]);
 
   return (
@@ -72,6 +97,13 @@ function GymsListContent() {
   useEffect(() => {
     setFavorites(getFavorites());
     setRecent(getRecent());
+
+    // Clean up old prefetch data on mount
+    try {
+      localStorage.removeItem(PREFETCH_KEY);
+    } catch {
+      // Ignore
+    }
 
     // Online/offline detection
     const updateOnlineStatus = () => setIsOffline(!navigator.onLine);

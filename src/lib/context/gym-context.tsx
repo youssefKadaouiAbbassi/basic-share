@@ -12,6 +12,8 @@ import {
 
 const CACHE_KEY = 'basicshare_gyms_cache_v2'; // v2: country-based filtering
 const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours - gym locations rarely change
+const PREFETCH_KEY = 'basicshare_prefetched_gym';
+const PREFETCH_TTL = 30 * 1000; // 30 seconds - prefetch is very short-lived
 
 // Default location (Paris) for users who deny geolocation
 const DEFAULT_LOCATION = { lat: 48.8566, lon: 2.3522 };
@@ -150,7 +152,33 @@ export function useGym(clubId: string) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // If context available and has gyms, find from cache
+    // Step 1: Check for prefetched data first (instant load)
+    if (typeof window !== 'undefined') {
+      try {
+        const prefetched = localStorage.getItem(PREFETCH_KEY);
+        if (prefetched) {
+          const parsed = JSON.parse(prefetched);
+          // Check if it's fresh and for the right gym
+          if (
+            parsed.data?.clubId === clubId &&
+            Date.now() - parsed.timestamp < PREFETCH_TTL
+          ) {
+            setGym(parsed.data);
+            setLoading(false);
+            // Clear prefetch cache after use
+            localStorage.removeItem(PREFETCH_KEY);
+            return;
+          }
+          // Stale or wrong gym - clear it
+          localStorage.removeItem(PREFETCH_KEY);
+        }
+      } catch {
+        // Ignore parse errors
+        localStorage.removeItem(PREFETCH_KEY);
+      }
+    }
+
+    // Step 2: If context available and has gyms, find from cache
     if (context && context.gyms.length > 0) {
       const found = context.gyms.find((g) => g.clubId === clubId);
       if (found) {
@@ -160,12 +188,12 @@ export function useGym(clubId: string) {
       }
     }
 
-    // If context is still loading, wait
+    // Step 3: If context is still loading, wait
     if (context && context.loading) {
       return;
     }
 
-    // Fallback: fetch single gym directly
+    // Step 4: Fallback - fetch single gym directly
     setLoading(true);
     fetchGymByClubId(clubId)
       .then((data) => {
