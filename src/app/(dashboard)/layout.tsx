@@ -35,8 +35,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <span className="text-sm font-medium pointer-events-none">Sign Out</span>
           </button>
         </header>
-        {/* Content area - flex-1 takes remaining space */}
-        <div className="flex-1 overflow-auto">
+        {/* Content area - flex-1 takes remaining space, only scroll when needed */}
+        <div className="flex-1 overflow-hidden">
           {children}
         </div>
       </div>
