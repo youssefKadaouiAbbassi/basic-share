@@ -68,12 +68,22 @@ function RedirectToDefaultGym({ gymId }: { gymId: string }) {
     prefetchAndRedirect();
   }, [gymId]);
 
-  // Show minimal content while redirecting - no spinner
-  return (
-    <div className="h-full flex items-center justify-center">
-      <p className="text-zinc-500 text-sm">Redirecting...</p>
-    </div>
-  );
+  // Show nothing while redirecting - redirect is fast enough
+  return null;
+}
+
+const GYMS_CACHE_KEY = 'basicshare_gyms_cache_v2';
+
+function getCachedGyms(): GymWithDistance[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const cached = localStorage.getItem(GYMS_CACHE_KEY);
+    if (!cached) return [];
+    const parsed = JSON.parse(cached);
+    return parsed.data.slice(0, 50).map((g: any) => ({ ...g, distance: 0 }));
+  } catch {
+    return [];
+  }
 }
 
 // Main component that uses the gym context
@@ -83,6 +93,9 @@ function GymsListContent() {
   const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
   const [locationLoading, setLocationLoading] = useState(true);
   const [isOffline, setIsOffline] = useState(false);
+
+  // Initialize with cached gyms for instant display
+  const [displayGyms, setDisplayGyms] = useState<GymWithDistance[]>(() => getCachedGyms());
 
   useEffect(() => {
     setFavorites(getFavorites());
@@ -115,19 +128,23 @@ function GymsListContent() {
     };
   }, []);
 
-  // Process gyms with distance
-  const gyms: GymWithDistance[] = useMemo(() => {
-    if (allGyms.length === 0) return [];
+  // Update displayGyms when context gyms are loaded
+  useEffect(() => {
+    if (allGyms.length === 0) return;
 
+    let processed: GymWithDistance[];
     if (userLocation) {
-      return getNearbyGyms(allGyms, userLocation.lat, userLocation.lon, 50).slice(0, 30);
+      processed = getNearbyGyms(allGyms, userLocation.lat, userLocation.lon, 50).slice(0, 30);
+    } else {
+      processed = allGyms
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .slice(0, 30)
+        .map((g) => ({ ...g, distance: 0 }));
     }
-
-    return allGyms
-      .sort((a, b) => a.name.localeCompare(b.name))
-      .slice(0, 30)
-      .map((g) => ({ ...g, distance: 0 }));
+    setDisplayGyms(processed);
   }, [allGyms, userLocation]);
+
+  const gyms = displayGyms;
 
   const toggleFavorite = (clubId: string, e: React.MouseEvent) => {
     e.preventDefault();
@@ -155,17 +172,12 @@ function GymsListContent() {
   return (
     <div className="h-full flex flex-col overflow-hidden">
       <OfflineBanner />
-      {isOffline && gyms.length === 0 && !loading && (
+      {isOffline && gyms.length === 0 && (
         <div className="flex-1 flex items-center justify-center px-4">
           <p className="text-zinc-500 text-sm text-center">Gyms will appear when you&apos;re back online</p>
         </div>
       )}
-      {!isOffline && gyms.length === 0 && loading && (
-        <div className="flex-1 flex items-center justify-center px-4">
-          <p className="text-zinc-500 text-sm text-center">Loading gyms...</p>
-        </div>
-      )}
-      {(!isOffline || gyms.length > 0) && (
+      {gyms.length > 0 && (
         <div className="flex-1 overflow-y-auto px-4 py-2">
         <div className="pt-2 pb-3">
           <h2 className="text-zinc-400 text-sm font-medium">All Gyms</h2>
