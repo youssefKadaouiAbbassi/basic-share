@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowLeft, Heart } from 'lucide-react';
+import { ArrowLeft, Bookmark, Heart } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
@@ -12,6 +12,7 @@ import { useGym } from '@/lib/context/gym-context';
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const FAVORITES_KEY = 'basicshare_favorite_gyms';
 const RECENT_KEY = 'basicshare_recent_gyms';
+const DEFAULT_GYM_KEY = 'basicshare_default_gym';
 
 function getFavorites(): string[] {
   if (typeof window === 'undefined') return [];
@@ -38,6 +39,24 @@ function saveRecent(clubId: string) {
   }
 }
 
+function getDefaultGym(): string | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    return localStorage.getItem(DEFAULT_GYM_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function setDefaultGym(clubId: string | null) {
+  if (typeof window === 'undefined') return;
+  if (clubId === null) {
+    localStorage.removeItem(DEFAULT_GYM_KEY);
+  } else {
+    localStorage.setItem(DEFAULT_GYM_KEY, clubId);
+  }
+}
+
 function getBusynessLevel(percentage: number) {
   if (percentage < 30) return { label: 'Quiet', color: 'text-emerald-400' };
   if (percentage < 70) return { label: 'Moderate', color: 'text-amber-400' };
@@ -48,6 +67,7 @@ export default function GymDetailPage() {
   const { slug } = useParams();
   const { gym, loading } = useGym(slug as string);
   const [favorites, setFavorites] = useState<string[]>([]);
+  const [defaultGym, setDefaultGymState] = useState<string | null>(null);
   const [selectedDay, setSelectedDay] = useState(() => {
     const d = new Date().getDay();
     return d === 0 ? 6 : d - 1;
@@ -62,6 +82,7 @@ export default function GymDetailPage() {
 
   useEffect(() => {
     setFavorites(getFavorites());
+    setDefaultGymState(getDefaultGym());
   }, []);
 
   useEffect(() => {
@@ -81,7 +102,15 @@ export default function GymDetailPage() {
     });
   };
 
+  const toggleDefaultGym = () => {
+    if (!gym) return;
+    const newDefault = defaultGym === gym.clubId ? null : gym.clubId;
+    setDefaultGym(newDefault);
+    setDefaultGymState(newDefault);
+  };
+
   const isFavorite = gym ? favorites.includes(gym.clubId) : false;
+  const isDefault = gym ? defaultGym === gym.clubId : false;
 
   if (loading) {
     return (
@@ -127,17 +156,32 @@ export default function GymDetailPage() {
       <div className="px-6 pb-6">
         <div className="flex items-start justify-between gap-3">
           <h1 className="text-2xl font-bold text-white mb-1">{gym.name.replace(/^Basic-Fit\s*/i, '')}</h1>
-          <button
-            type="button"
-            onClick={toggleFavorite}
-            className="p-2 -mr-2 -mt-1"
-          >
-            <Heart
-              className={`w-6 h-6 transition-colors ${
-                isFavorite ? 'fill-orange-500 text-orange-500' : 'text-zinc-600 hover:text-zinc-400'
-              }`}
-            />
-          </button>
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={toggleDefaultGym}
+              className="p-2 -mr-1 -mt-1"
+              title={isDefault ? 'Remove as default gym' : 'Set as default gym'}
+            >
+              <Bookmark
+                className={`w-5 h-5 transition-colors ${
+                  isDefault ? 'fill-orange-500 text-orange-500' : 'text-zinc-600 hover:text-zinc-400'
+                }`}
+              />
+            </button>
+            <button
+              type="button"
+              onClick={toggleFavorite}
+              className="p-2 -mr-2 -mt-1"
+              title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+            >
+              <Heart
+                className={`w-6 h-6 transition-colors ${
+                  isFavorite ? 'fill-orange-500 text-orange-500' : 'text-zinc-600 hover:text-zinc-400'
+                }`}
+              />
+            </button>
+          </div>
         </div>
         <p className="text-zinc-400 text-sm">{gym.address}, {gym.city}</p>
       </div>

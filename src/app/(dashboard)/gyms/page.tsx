@@ -14,6 +14,7 @@ import { useGyms } from '@/lib/context/gym-context';
 
 const FAVORITES_KEY = 'basicshare_favorite_gyms';
 const RECENT_KEY = 'basicshare_recent_gyms';
+const DEFAULT_GYM_KEY = 'basicshare_default_gym';
 
 function getFavorites(): string[] {
   if (typeof window === 'undefined') return [];
@@ -37,6 +38,15 @@ function getRecent(): string[] {
   }
 }
 
+function getDefaultGym(): string | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    return localStorage.getItem(DEFAULT_GYM_KEY);
+  } catch {
+    return null;
+  }
+}
+
 export default function GymsPage() {
   const { gyms: allGyms, loading } = useGyms();
   const [favorites, setFavorites] = useState<string[]>([]);
@@ -44,10 +54,19 @@ export default function GymsPage() {
   const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
   const [locationLoading, setLocationLoading] = useState(true);
   const [isOffline, setIsOffline] = useState(false);
+  const [redirecting, setRedirecting] = useState(false);
 
   useEffect(() => {
     setFavorites(getFavorites());
     setRecent(getRecent());
+
+    // Check for default gym and redirect
+    const defaultGymId = getDefaultGym();
+    if (defaultGymId) {
+      setRedirecting(true);
+      window.location.href = `/gyms/${defaultGymId}`;
+      return;
+    }
 
     // Online/offline detection
     const updateOnlineStatus = () => setIsOffline(!navigator.onLine);
@@ -118,7 +137,7 @@ export default function GymsPage() {
       });
   }, [gyms, favorites, recentGyms]);
 
-  if (loading || locationLoading) {
+  if (loading || locationLoading || redirecting) {
     return (
       <div className="h-full flex items-center justify-center">
         <Spinner size="lg" />
@@ -136,6 +155,9 @@ export default function GymsPage() {
       )}
       {(!isOffline || gyms.length > 0) && (
         <div className="flex-1 overflow-y-auto px-4 py-2">
+        <div className="pt-2 pb-3">
+          <h2 className="text-zinc-400 text-sm font-medium">All Gyms</h2>
+        </div>
         {recentGyms.length > 0 && (
           <>
             <div className="flex items-center gap-2 mb-3 mt-1">
