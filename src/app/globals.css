@@ -83,6 +83,8 @@
     overflow: hidden;
     margin: 0;
     padding: 0;
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
   }
   body {
     @apply bg-background text-foreground;
@@ -90,7 +92,8 @@
     overflow: hidden;
     margin: 0;
     padding: 0;
-    position: fixed;
     width: 100%;
+    overscroll-behavior: none;
+    /* NO position: fixed - it breaks iOS PWA standalone mode! */
   }
 }

@@ -11,7 +11,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <ProtectedRoute>
-      <div className="h-[100dvh] w-full bg-zinc-950 flex flex-col overflow-hidden fixed inset-0">
+      <div className="h-full w-full bg-zinc-950 flex flex-col overflow-hidden">
         {/* Header with Sign Out - static, doesn't re-render */}
         <header className="relative z-10 px-4 sm:px-5 pt-3 sm:pt-5 pb-2 flex justify-between items-start flex-shrink-0">
           <div>
