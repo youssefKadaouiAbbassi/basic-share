@@ -71,6 +71,28 @@ query GetGyms($limit: Int!) {
 }
 `;
 
+// Contentful GraphQL query for gyms by country
+const GYM_BY_COUNTRY_QUERY = `
+query GetGymsByCountry($country: String!, $limit: Int!) {
+  clubCollection(where: { country: $country }, limit: $limit) {
+    items {
+      sys { id }
+      clubId
+      name
+      displayName
+      address
+      city
+      country
+      location {
+        lat
+        lon
+      }
+      busynessData
+    }
+  }
+}
+`;
+
 // Contentful GraphQL query for single gym
 const SINGLE_GYM_QUERY = `
 query GetGymByClubId($clubId: String!) {
@@ -92,6 +114,62 @@ query GetGymByClubId($clubId: String!) {
   }
 }
 `;
+
+// Detect country code from coordinates (approximate bounding boxes)
+export function detectCountryFromCoords(lat: number, lon: number): string {
+  // France
+  if (lat >= 41 && lat <= 51.5 && lon >= -5 && lon <= 10) return 'FR';
+  // Netherlands
+  if (lat >= 50.5 && lat <= 54 && lon >= 3 && lon <= 7.5) return 'NL';
+  // Belgium
+  if (lat >= 49.5 && lat <= 51.5 && lon >= 2.5 && lon <= 6.5) return 'BE';
+  // Germany
+  if (lat >= 47 && lat <= 55 && lon >= 5.5 && lon <= 15) return 'DE';
+  // Spain
+  if (lat >= 36 && lat <= 44 && lon >= -10 && lon <= 4) return 'ES';
+  // Luxembourg
+  if (lat >= 49 && lat <= 50.5 && lon >= 5.5 && lon <= 6.5) return 'LU';
+  // Default to France (largest Basic-Fit presence)
+  return 'FR';
+}
+
+// Fetch gyms by country (much faster than fetching all)
+export async function fetchGymsByCountry(country: string, limit: number = 1000): Promise<Gym[]> {
+  const response = await fetch(
+    `https://graphql.contentful.com/content/v1/spaces/${CONTENTFUL_SPACE_ID}/environments/${CONTENTFUL_ENV}`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${CONTENTFUL_TOKEN}`,
+      },
+      body: JSON.stringify({
+        query: GYM_BY_COUNTRY_QUERY,
+        variables: { country, limit },
+      }),
+    }
+  );
+
+  const data = await response.json();
+
+  if (!data.data?.clubCollection?.items) {
+    console.error('Failed to fetch gyms by country:', data);
+    return [];
+  }
+
+  return data.data.clubCollection.items.map((item: ContentfulGymItem) => ({
+    id: item.sys.id,
+    clubId: item.clubId,
+    name: item.name,
+    slug: item.clubId,
+    address: item.address || '',
+    city: item.city || '',
+    country: item.country || '',
+    latitude: item.location?.lat || 0,
+    longitude: item.location?.lon || 0,
+    busynessData: item.busynessData,
+  }));
+}
 
 // Fetch all gyms from Contentful
 export async function fetchGyms(limit: number = 2000): Promise<Gym[]> {

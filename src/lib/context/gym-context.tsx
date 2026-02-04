@@ -3,8 +3,9 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import {
   calculateDistance,
+  detectCountryFromCoords,
   fetchGymByClubId,
-  fetchGyms,
+  fetchGymsByCountry,
   type Gym,
   type GymWithDistance,
 } from '@/lib/api/basic-fit';
@@ -78,8 +79,9 @@ export function GymProvider({ children }: { children: React.ReactNode }) {
       if (cached) {
         allGyms = cached.data;
       } else {
-        // Fetch all gyms (cached for 24 hours - locations rarely change)
-        allGyms = await fetchGyms();
+        // Detect country and fetch only gyms from that country (~500-900 vs 2000)
+        const country = detectCountryFromCoords(lat, lon);
+        allGyms = await fetchGymsByCountry(country);
         setCache(allGyms, { lat, lon });
       }
 
