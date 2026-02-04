@@ -36,12 +36,17 @@ export const metadata: Metadata = {
       { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
       { url: '/icon-512.png', sizes: '512x512', type: 'image/png' },
     ],
-    apple: [{ url: '/icon-192.png', sizes: '192x192', type: 'image/png' }],
+    apple: [
+      { url: '/apple-touch-icon.png', sizes: '192x192', type: 'image/png' },
+    ],
   },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
     title: 'BasicShare',
+    startupImage: [
+      '/apple-touch-icon.png',
+    ],
   },
 };
 
@@ -49,7 +54,8 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5,
-  themeColor: '#000000',
+  themeColor: '#09090b',
+  viewportFit: 'cover',
 };
 
 export default function RootLayout({
@@ -59,6 +65,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
+      <head>
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="BasicShare" />
+      </head>
       <body className={`${inter.variable} font-sans antialiased bg-zinc-950 text-white`}>
         <ServiceWorkerRegister />
         {children}
