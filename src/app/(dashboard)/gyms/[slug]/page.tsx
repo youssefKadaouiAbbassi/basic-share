@@ -10,6 +10,7 @@ import { useGym } from '@/lib/context/gym-context';
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const FAVORITES_KEY = 'basicshare_favorite_gyms';
+const RECENT_KEY = 'basicshare_recent_gyms';
 
 function getFavorites(): string[] {
   if (typeof window === 'undefined') return [];
@@ -22,6 +23,18 @@ function getFavorites(): string[] {
 
 function saveFavorites(favorites: string[]) {
   localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
+}
+
+function saveRecent(clubId: string) {
+  if (typeof window === 'undefined') return;
+  try {
+    const current = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]') as string[];
+    const filtered = current.filter((id) => id !== clubId);
+    const updated = [clubId, ...filtered].slice(0, 3);
+    localStorage.setItem(RECENT_KEY, JSON.stringify(updated));
+  } catch {
+    // Ignore errors
+  }
 }
 
 function getBusynessLevel(percentage: number) {
@@ -49,6 +62,12 @@ export default function GymDetailPage() {
   useEffect(() => {
     setFavorites(getFavorites());
   }, []);
+
+  useEffect(() => {
+    if (gym) {
+      saveRecent(gym.clubId);
+    }
+  }, [gym]);
 
   const toggleFavorite = () => {
     if (!gym) return;
