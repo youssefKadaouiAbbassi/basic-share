@@ -4,6 +4,7 @@ import { Heart } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { OfflineBanner } from '@/components/ui/offline-banner';
+import { Spinner } from '@/components/ui/spinner';
 import {
   fetchGymBusyness,
   fetchGymByClubId,
@@ -172,7 +173,12 @@ function GymsListContent() {
   return (
     <div className="h-full flex flex-col overflow-hidden">
       <OfflineBanner />
-      {isOffline && gyms.length === 0 && (
+      {loading && gyms.length === 0 && (
+        <div className="flex-1 flex items-center justify-center px-4">
+          <Spinner size="lg" />
+        </div>
+      )}
+      {!loading && isOffline && gyms.length === 0 && (
         <div className="flex-1 flex items-center justify-center px-4">
           <p className="text-zinc-500 text-sm text-center">Gyms will appear when you&apos;re back online</p>
         </div>
