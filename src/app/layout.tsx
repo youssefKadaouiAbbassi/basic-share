@@ -67,9 +67,19 @@ export default function RootLayout({
     <html lang="en" className="dark">
       <head>
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="BasicShare" />
+
+        {/* iPhone X/XS/11 Pro */}
+        <link rel="apple-touch-startup-image" href="/splash-1125x2436.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)" />
+
+        {/* iPhone 12/13/14 */}
+        <link rel="apple-touch-startup-image" href="/splash-1170x2532.png" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)" />
+
+        {/* iPhone 12/13/14 Plus/Pro Max */}
+        <link rel="apple-touch-startup-image" href="/splash-1284x2778.png" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3)" />
       </head>
       <body className={`${inter.variable} font-sans antialiased bg-zinc-950 text-white`}>
         <ServiceWorkerRegister />
