@@ -193,8 +193,8 @@ export default function GymDetailPage() {
                 }}
                 labelStyle={{ color: '#a1a1aa', fontSize: 12 }}
                 itemStyle={{ color: '#f97316', fontWeight: 600 }}
-                formatter={(value: number) => [`${value}%`, 'Busyness']}
-                labelFormatter={(hour: number) => `${hour}:00`}
+                formatter={(value) => [`${value ?? 0}%`, 'Busyness']}
+                labelFormatter={(hour) => `${hour}:00`}
               />
               <Area
                 type="monotone"
