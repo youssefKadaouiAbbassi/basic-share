@@ -93,8 +93,8 @@ export default function GymDetailPage() {
   const isFavorite = gym ? favorites.includes(gym.clubId) : false;
   const isDefault = gym ? defaultGym === gym.clubId : false;
 
-  // Only show spinner if we have no gym data at all
-  // If we have gym data (from prefetch or cache), show it even while loading updates
+  // Only show spinner if we have no gym data at all AND still loading
+  // If we have gym data (from prefetch or cache), show it immediately
   if (loading && !gym) {
     return (
       <div className="h-full flex items-center justify-center">

@@ -4,7 +4,6 @@ import { CheckCircle, Pause, RefreshCw, XCircle } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { useCallback, useEffect, useState } from 'react';
 import PWAInstallPrompt from '@/components/pwa-install-prompt';
-import { Spinner } from '@/components/ui/spinner';
 import { type AccessResult, checkAccessResult } from '@/lib/api/basic-fit';
 import {
   ACCESS_CHECK_INTERVAL,
@@ -124,12 +123,9 @@ export default function QRCodeContent() {
     return () => clearInterval(interval);
   }, [authData, isVisible]);
 
+  // If no auth data, redirect happens in useEffect - no need for spinner
   if (!authData) {
-    return (
-      <div className="min-h-[100dvh] bg-zinc-950 flex items-center justify-center">
-        <Spinner size="lg" />
-      </div>
-    );
+    return null;
   }
 
   return (
@@ -173,23 +169,9 @@ export default function QRCodeContent() {
               {/* Inner border highlight */}
               <div className="absolute inset-[1px] rounded-[calc(1rem-1px)] sm:rounded-[calc(2rem-1px)] border border-black/5 pointer-events-none" />
 
-              {/* QR Code with cross-fade transition */}
+              {/* QR Code - renders instantly, no spinner needed */}
               <div className="relative aspect-square">
-                {/* Spinner layer - fades out when QR ready */}
-                <div
-                  className={`absolute inset-0 flex items-center justify-center transition-opacity duration-300 ${
-                    qrData ? 'opacity-0 pointer-events-none' : 'opacity-100'
-                  }`}
-                >
-                  <Spinner size="lg" />
-                </div>
-                {/* QR layer - fades in when ready */}
-                <div
-                  key={animationKey}
-                  className={`transition-opacity duration-300 animate-qr-refresh ${
-                    qrData ? 'opacity-100' : 'opacity-0'
-                  }`}
-                >
+                <div key={animationKey} className="animate-qr-refresh">
                   {qrData && (
                     <QRCodeSVG
                       value={qrData}

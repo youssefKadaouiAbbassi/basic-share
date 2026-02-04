@@ -153,7 +153,7 @@ function GymsListContent() {
   }, [gyms, favorites]);
 
   // Show content immediately if we have gyms (even if location is still loading)
-  // Location loading will update distances in the background
+  // Only show spinner if truly no data and still loading
   const showSpinner = loading && gyms.length === 0;
 
   if (showSpinner) {
