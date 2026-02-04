@@ -8,8 +8,9 @@ const withSerwist = withSerwistInit({
 });
 
 const nextConfig: NextConfig = {
-  /* config options here */
-  turbopack: {},
+  /* Turbopack disabled for build - Serwist doesn't support it yet */
+  /* See: https://github.com/serwist/serwist/issues/54 */
+  /* Using --webpack flag in build script */
 };
 
 export default withSerwist(nextConfig);
