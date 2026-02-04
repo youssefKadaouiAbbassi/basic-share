@@ -162,14 +162,16 @@ export default function QRCodeContent() {
         </div>
         <button
           type="button"
-          onClick={() => {
-            localStorage.removeItem(STORAGE_KEY);
-            window.location.href = '/login';
+          onClick={handleLogout}
+          onTouchEnd={(e) => {
+            e.preventDefault();
+            handleLogout();
           }}
-          className="relative z-20 flex items-center gap-2 text-zinc-500 hover:text-white active:text-zinc-300 px-4 py-3 rounded-xl min-h-[48px] bg-zinc-900/50 border border-zinc-800"
+          className="relative z-20 flex items-center gap-2 text-zinc-500 hover:text-white active:text-zinc-300 px-4 py-3 rounded-xl min-h-[48px] bg-zinc-900/50 border border-zinc-800 select-none"
+          style={{ touchAction: 'manipulation' }}
         >
-          <LogOut className="w-5 h-5" strokeWidth={2} />
-          <span className="text-sm font-medium">Sign Out</span>
+          <LogOut className="w-5 h-5 pointer-events-none" strokeWidth={2} />
+          <span className="text-sm font-medium pointer-events-none">Sign Out</span>
         </button>
       </header>
 
