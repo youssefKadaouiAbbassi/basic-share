@@ -2,14 +2,22 @@
 
 import { LogOut, MapPin, QrCode } from 'lucide-react';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import { ProtectedRoute } from '@/components/auth/protected-route';
 import { STORAGE_KEY } from '@/lib/constants';
 import { GymProvider } from '@/lib/context/gym-context';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [gymsHref, setGymsHref] = useState('/gyms');
   const pathname = usePathname();
+
+  useLayoutEffect(() => {
+    const defaultGym = localStorage.getItem('basicshare_default_gym');
+    if (defaultGym) {
+      setGymsHref(`/gyms/${defaultGym}`);
+    }
+  }, []);
 
   useEffect(() => {
     if (!showLogoutConfirm) return;
@@ -84,7 +92,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <span className="text-[9px] font-normal">QR Code</span>
             </a>
             <a
-              href="/gyms"
+              href={gymsHref}
               className={`flex-1 flex flex-col items-center gap-0.5 py-2 transition-colors ${
                 pathname?.startsWith('/gyms')
                   ? 'text-orange-500'
