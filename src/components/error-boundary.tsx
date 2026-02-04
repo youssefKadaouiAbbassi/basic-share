@@ -48,6 +48,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
               An unexpected error occurred. Please try refreshing the page.
             </p>
             <button
+              type="button"
               onClick={this.handleReset}
               className="rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 px-6 py-3 font-semibold text-white shadow-lg shadow-orange-500/25 transition-all hover:from-orange-600 hover:to-orange-700"
             >

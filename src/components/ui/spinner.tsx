@@ -24,13 +24,7 @@ export function Spinner({ size = 'md', className }: SpinnerProps) {
     .filter(Boolean)
     .join(' ');
 
-  return (
-    <div
-      role="status"
-      aria-label="Loading"
-      className={classes}
-    />
-  );
+  return <output aria-label="Loading" className={classes} />;
 }
 
 export default Spinner;

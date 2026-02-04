@@ -70,7 +70,7 @@ export default function PWAInstallPrompt() {
         localStorage.setItem(INSTALL_DISMISSED_KEY, 'true');
       }
       setDeferredPrompt(null);
-    } catch (error) {
+    } catch (_error) {
       // Silently fail - user may have dismissed
     }
   };
@@ -99,6 +99,7 @@ export default function PWAInstallPrompt() {
         <div className="relative px-5 pt-4 pb-6 border-t border-zinc-800/80">
           {/* Close button */}
           <button
+            type="button"
             onClick={handleDismiss}
             className="absolute top-3 right-3 p-2 text-zinc-500 hover:text-white active:text-zinc-300 transition-colors rounded-lg min-h-[44px] min-w-[44px] flex items-center justify-center"
             aria-label="Dismiss"
@@ -131,6 +132,7 @@ export default function PWAInstallPrompt() {
 
           {/* Dismiss link */}
           <button
+            type="button"
             onClick={handleDismiss}
             className="text-zinc-500 hover:text-zinc-400 active:text-zinc-300 text-xs font-medium transition-colors ml-[52px]"
           >
@@ -159,6 +161,7 @@ export default function PWAInstallPrompt() {
         <div className="relative px-5 pt-4 pb-6 border-t border-zinc-800/80">
           {/* Close button */}
           <button
+            type="button"
             onClick={handleDismiss}
             className="absolute top-3 right-3 p-2 text-zinc-500 hover:text-white active:text-zinc-300 transition-colors rounded-lg min-h-[44px] min-w-[44px] flex items-center justify-center"
             aria-label="Dismiss"
@@ -190,6 +193,7 @@ export default function PWAInstallPrompt() {
           {/* Action buttons */}
           <div className="flex items-center gap-3 ml-[52px]">
             <button
+              type="button"
               onClick={handleInstall}
               className="flex items-center gap-2 bg-gradient-to-br from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 active:from-orange-700 active:to-orange-800 text-white font-semibold text-sm px-5 py-2.5 rounded-xl transition-all duration-200 shadow-lg shadow-orange-500/25 min-h-[44px]"
             >
@@ -197,6 +201,7 @@ export default function PWAInstallPrompt() {
               Install App
             </button>
             <button
+              type="button"
               onClick={handleDismiss}
               className="text-zinc-500 hover:text-zinc-400 active:text-zinc-300 text-sm font-medium transition-colors px-3"
             >

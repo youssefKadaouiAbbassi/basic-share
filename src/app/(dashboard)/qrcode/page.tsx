@@ -7,9 +7,8 @@ import dynamic from 'next/dynamic';
 const QRCodeContent = dynamic(() => import('./qrcode-content'), {
   ssr: false,
   loading: () => (
-    <div
+    <output
       className="h-full w-full bg-zinc-950 flex items-center justify-center"
-      role="status"
       aria-live="polite"
     >
       <div className="flex flex-col items-center gap-3">
@@ -19,7 +18,7 @@ const QRCodeContent = dynamic(() => import('./qrcode-content'), {
         />
         <span className="text-zinc-500 text-sm font-medium">Loading your pass...</span>
       </div>
-    </div>
+    </output>
   ),
 });
 

@@ -14,7 +14,8 @@
       "!**/dist",
       "!**/build",
       "!**/*.config.js",
-      "!**/*.config.mjs"
+      "!**/*.config.mjs",
+      "!**/globals.css"
     ]
   },
   "formatter": {

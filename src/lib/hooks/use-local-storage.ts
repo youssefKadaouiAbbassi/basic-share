@@ -19,7 +19,7 @@ export function useLocalStorage<T>(key: string, initialValue: T): [T, SetValue<T
       if (item) {
         setStoredValue(JSON.parse(item));
       }
-    } catch (error) {
+    } catch (_error) {
       // Ignore parse errors
     }
   }, [key]);
@@ -32,7 +32,7 @@ export function useLocalStorage<T>(key: string, initialValue: T): [T, SetValue<T
       if (mounted) {
         window.localStorage.setItem(key, JSON.stringify(valueToStore));
       }
-    } catch (error) {
+    } catch (_error) {
       // Ignore storage errors (quota exceeded, etc.)
     }
   };

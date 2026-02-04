@@ -58,11 +58,18 @@ export default function Home() {
         {/* App icon with refined styling */}
         <div className="relative mb-10" role="img" aria-label="BasicShare app icon">
           {/* Outer glow ring */}
-          <div className="absolute -inset-3 bg-orange-500/20 rounded-[2rem] blur-xl" aria-hidden="true" />
+          <div
+            className="absolute -inset-3 bg-orange-500/20 rounded-[2rem] blur-xl"
+            aria-hidden="true"
+          />
           {/* Icon container */}
           <div className="relative w-[88px] h-[88px] rounded-[1.75rem] bg-gradient-to-b from-orange-400 via-orange-500 to-orange-600 p-[1px] shadow-2xl shadow-orange-500/25">
             <div className="w-full h-full rounded-[calc(1.75rem-1px)] bg-gradient-to-b from-orange-500 to-orange-600 flex items-center justify-center">
-              <QrCode className="w-11 h-11 text-white drop-shadow-sm" strokeWidth={2.25} aria-hidden="true" />
+              <QrCode
+                className="w-11 h-11 text-white drop-shadow-sm"
+                strokeWidth={2.25}
+                aria-hidden="true"
+              />
             </div>
           </div>
         </div>
@@ -82,7 +89,10 @@ export default function Home() {
           className="group w-full flex items-center justify-center gap-2 py-[18px] px-6 rounded-2xl bg-gradient-to-b from-orange-500 to-orange-600 text-white font-semibold text-[17px] transition-all duration-200 shadow-lg shadow-orange-500/30 active:scale-[0.98] active:shadow-orange-500/20 hover:shadow-xl hover:shadow-orange-500/35 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 relative overflow-hidden"
         >
           {/* Subtle top highlight */}
-          <span className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" aria-hidden="true" />
+          <span
+            className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent"
+            aria-hidden="true"
+          />
           <span>Get Started</span>
           <ChevronRight
             className="w-5 h-5 transition-transform duration-200 group-hover:translate-x-0.5 group-active:translate-x-1"
@@ -92,7 +102,7 @@ export default function Home() {
         </a>
 
         {/* Trust indicator */}
-        <div className="mt-12 flex items-center gap-2 text-zinc-600" role="status" aria-live="polite">
+        <output className="mt-12 flex items-center gap-2 text-zinc-600" aria-live="polite">
           <svg
             className="w-4 h-4"
             viewBox="0 0 24 24"
@@ -107,7 +117,7 @@ export default function Home() {
             <path d="M7 11V7a5 5 0 0 1 10 0v4" />
           </svg>
           <span className="text-sm font-medium">Stored securely on your device</span>
-        </div>
+        </output>
 
         {/* Developer credit */}
         <a
