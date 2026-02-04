@@ -38,7 +38,7 @@ function getRecent(): string[] {
   }
 }
 
-function getDefaultGym(): string | null {
+function getDefaultGymSync(): string | null {
   if (typeof window === 'undefined') return null;
   try {
     return localStorage.getItem(DEFAULT_GYM_KEY);
@@ -47,26 +47,31 @@ function getDefaultGym(): string | null {
   }
 }
 
-export default function GymsPage() {
+// Simple redirect component that doesn't trigger gym fetching
+function RedirectToDefaultGym({ gymId }: { gymId: string }) {
+  useEffect(() => {
+    window.location.href = `/gyms/${gymId}`;
+  }, [gymId]);
+
+  return (
+    <div className="h-full flex items-center justify-center">
+      <Spinner size="lg" />
+    </div>
+  );
+}
+
+// Main component that uses the gym context
+function GymsListContent() {
   const { gyms: allGyms, loading } = useGyms();
   const [favorites, setFavorites] = useState<string[]>([]);
   const [recent, setRecent] = useState<string[]>([]);
   const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
   const [locationLoading, setLocationLoading] = useState(true);
   const [isOffline, setIsOffline] = useState(false);
-  const [redirecting, setRedirecting] = useState(false);
 
   useEffect(() => {
     setFavorites(getFavorites());
     setRecent(getRecent());
-
-    // Check for default gym and redirect
-    const defaultGymId = getDefaultGym();
-    if (defaultGymId) {
-      setRedirecting(true);
-      window.location.href = `/gyms/${defaultGymId}`;
-      return;
-    }
 
     // Online/offline detection
     const updateOnlineStatus = () => setIsOffline(!navigator.onLine);
@@ -137,7 +142,7 @@ export default function GymsPage() {
       });
   }, [gyms, favorites, recentGyms]);
 
-  if (loading || locationLoading || redirecting) {
+  if (loading || locationLoading) {
     return (
       <div className="h-full flex items-center justify-center">
         <Spinner size="lg" />
@@ -242,4 +247,17 @@ export default function GymsPage() {
       )}
     </div>
   );
+}
+
+// Wrapper component that checks for default gym before rendering list
+export default function GymsPage() {
+  const [defaultGym] = useState(() => getDefaultGymSync());
+
+  // If there's a default gym, just show spinner and redirect
+  if (defaultGym) {
+    return <RedirectToDefaultGym gymId={defaultGym} />;
+  }
+
+  // Only NOW use the context that triggers fetching
+  return <GymsListContent />;
 }
