@@ -10,7 +10,7 @@ import {
   type GymWithDistance,
 } from '@/lib/api/basic-fit';
 
-const CACHE_KEY = 'basicshare_gyms_cache';
+const CACHE_KEY = 'basicshare_gyms_cache_v2'; // v2: country-based filtering
 const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours - gym locations rarely change
 
 // Default location (Paris) for users who deny geolocation
@@ -91,9 +91,8 @@ export function GymProvider({ children }: { children: React.ReactNode }) {
           ...gym,
           distance: calculateDistance(lat, lon, gym.latitude, gym.longitude),
         }))
-        .filter((gym) => gym.distance <= 50) // Within 50km
         .sort((a, b) => a.distance - b.distance)
-        .slice(0, 50); // Top 50 nearest
+        .slice(0, 50); // Top 50 nearest (no distance cap - show nearest regardless)
 
       setGyms(gymsWithDistance);
     } catch (err) {
