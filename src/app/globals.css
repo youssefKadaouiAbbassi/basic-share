@@ -51,6 +51,11 @@
   --border: oklch(1 0 0 / 12%);
   --input: oklch(1 0 0 / 18%);
   --ring: oklch(0.657 0.203 29.696);
+
+  /* Gradient definitions */
+  --gradient-primary: linear-gradient(to bottom, #f97316, #ea580c);
+  --gradient-primary-hover: linear-gradient(to bottom, #ea580c, #c2410c);
+  --gradient-progress: linear-gradient(90deg, #ea580c 0%, #f97316 50%, #fb923c 100%);
 }
 
 .dark {
@@ -124,4 +129,32 @@
       outline-width: 3px;
     }
   }
+}
+
+/* Progress bar animation - extracted from qrcode-content.tsx */
+@keyframes progress-fill {
+  from { width: 0%; }
+  to { width: 100%; }
+}
+
+/* Ambient glow effects - extracted from inline styles */
+.ambient-glow-primary {
+  background: radial-gradient(circle, rgba(249, 115, 22, 0.08) 0%, transparent 60%);
+}
+
+.ambient-glow-secondary {
+  background: radial-gradient(ellipse, rgba(251, 146, 60, 0.04) 0%, transparent 70%);
+}
+
+.ambient-glow-login {
+  background: radial-gradient(circle, #f97316 0%, transparent 70%);
+}
+
+.noise-texture {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+/* Progress bar with gradient */
+.progress-bar-gradient {
+  background: var(--gradient-progress);
 }

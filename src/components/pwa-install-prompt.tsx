@@ -2,8 +2,7 @@
 
 import { Download, Plus, Share, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
-
-const STORAGE_KEY = 'basicshare_install_dismissed';
+import { INSTALL_DISMISSED_KEY } from '@/lib/constants';
 
 type Platform = 'ios' | 'android' | 'desktop' | 'unknown';
 
@@ -25,7 +24,7 @@ export default function PWAInstallPrompt() {
     const isStandalone =
       window.matchMedia('(display-mode: standalone)').matches ||
       (window.navigator as unknown as { standalone?: boolean }).standalone === true;
-    const dismissed = localStorage.getItem(STORAGE_KEY);
+    const dismissed = localStorage.getItem(INSTALL_DISMISSED_KEY);
 
     if (isStandalone || dismissed) return;
 
@@ -68,7 +67,7 @@ export default function PWAInstallPrompt() {
 
       if (outcome === 'accepted') {
         setShow(false);
-        localStorage.setItem(STORAGE_KEY, 'true');
+        localStorage.setItem(INSTALL_DISMISSED_KEY, 'true');
       }
       setDeferredPrompt(null);
     } catch (error) {
@@ -77,7 +76,7 @@ export default function PWAInstallPrompt() {
   };
 
   const handleDismiss = () => {
-    localStorage.setItem(STORAGE_KEY, 'true');
+    localStorage.setItem(INSTALL_DISMISSED_KEY, 'true');
     setShow(false);
   };
 

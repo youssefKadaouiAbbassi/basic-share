@@ -4,10 +4,9 @@ import { Pause, RefreshCw } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { useCallback, useEffect, useState } from 'react';
 import PWAInstallPrompt from '@/components/pwa-install-prompt';
-import { STORAGE_KEY } from '@/lib/constants';
+import { Spinner } from '@/components/ui/spinner';
+import { STORAGE_KEY, QR_REFRESH_INTERVAL, QR_SIZE, QR_ERROR_LEVEL } from '@/lib/constants';
 
-const REFRESH_INTERVAL = 5000; // 5 seconds
-const TOTAL_CYCLES = 6; // 6 cycles × 5s = 30s total
 
 interface AuthData {
   cardNumber: string;
@@ -33,20 +32,6 @@ function generateQRData(cardNumber: string, deviceId: string, guid: string): str
 }
 
 export default function QRCodeContent() {
-  // Inject CSS animation for progress bar
-  useEffect(() => {
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes progress-fill {
-        from { width: 0%; }
-        to { width: 100%; }
-      }
-    `;
-    document.head.appendChild(style);
-    return () => {
-      document.head.removeChild(style);
-    };
-  }, []);
   const [authData] = useState<AuthData | null>(() => {
     if (typeof window === 'undefined') return null;
     const stored = localStorage.getItem(STORAGE_KEY);
@@ -100,14 +85,14 @@ export default function QRCodeContent() {
     // Generate immediately when becoming visible
     generate();
 
-    const interval = setInterval(generate, REFRESH_INTERVAL);
+    const interval = setInterval(generate, QR_REFRESH_INTERVAL);
     return () => clearInterval(interval);
   }, [authData, isVisible, generate]);
 
   if (!authData) {
     return (
       <div className="min-h-[100dvh] bg-zinc-950 flex items-center justify-center">
-        <div className="w-10 h-10 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
+        <Spinner size="lg" />
       </div>
     );
   }
@@ -117,26 +102,11 @@ export default function QRCodeContent() {
       {/* Layered ambient background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {/* Primary glow behind QR area */}
-        <div
-          className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/4 w-[600px] h-[600px] rounded-full"
-          style={{
-            background: 'radial-gradient(circle, rgba(249, 115, 22, 0.08) 0%, transparent 60%)',
-          }}
-        />
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/4 w-[600px] h-[600px] rounded-full ambient-glow-primary" />
         {/* Secondary ambient glow */}
-        <div
-          className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/3 w-[800px] h-[400px] rounded-full opacity-50"
-          style={{
-            background: 'radial-gradient(ellipse, rgba(251, 146, 60, 0.04) 0%, transparent 70%)',
-          }}
-        />
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/3 w-[800px] h-[400px] rounded-full opacity-50 ambient-glow-secondary" />
         {/* Subtle noise texture */}
-        <div
-          className="absolute inset-0 opacity-[0.012]"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
-          }}
-        />
+        <div className="absolute inset-0 opacity-[0.012] noise-texture" />
       </div>
 
       {/* Main content - QR Code Hero */}
@@ -173,15 +143,15 @@ export default function QRCodeContent() {
                 {qrData ? (
                   <QRCodeSVG
                     value={qrData}
-                    size={280}
-                    level="M"
+                    size={QR_SIZE}
+                    level={QR_ERROR_LEVEL}
                     className="w-full h-auto"
                     bgColor="#ffffff"
                     fgColor="#09090b"
                   />
                 ) : (
                   <div className="w-full aspect-square flex items-center justify-center">
-                    <div className="w-10 h-10 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
+                    <Spinner size="lg" />
                   </div>
                 )}
               </div>
@@ -223,10 +193,9 @@ export default function QRCodeContent() {
             <div className="h-1 bg-zinc-900/80 rounded-full overflow-hidden">
               <div
                 key={animationKey}
-                className="h-full rounded-full"
+                className="h-full rounded-full progress-bar-gradient"
                 style={{
                   width: '0%',
-                  background: 'linear-gradient(90deg, #ea580c 0%, #f97316 50%, #fb923c 100%)',
                   animation: isVisible ? 'progress-fill 5s linear forwards' : 'none',
                 }}
               />

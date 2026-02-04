@@ -2,7 +2,8 @@
 
 import { ArrowLeft, QrCode } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { STORAGE_KEY } from '@/lib/constants';
+import { Spinner } from '@/components/ui/spinner';
+import { CARD_NUMBER_MIN_LENGTH, STORAGE_KEY } from '@/lib/constants';
 
 export default function LoginPage() {
   const [cardNumber, setCardNumber] = useState('');
@@ -31,7 +32,7 @@ export default function LoginPage() {
       return;
     }
 
-    if (digitsOnly.length < 6) {
+    if (digitsOnly.length < CARD_NUMBER_MIN_LENGTH) {
       setError('Card number seems too short');
       return;
     }
@@ -64,19 +65,9 @@ export default function LoginPage() {
     <div className="min-h-[100dvh] bg-zinc-950 flex flex-col relative overflow-hidden">
       {/* Ambient background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div
-          className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full opacity-[0.05]"
-          style={{
-            background: 'radial-gradient(circle, #f97316 0%, transparent 70%)',
-          }}
-        />
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full opacity-[0.05] ambient-glow-login" />
         {/* Subtle noise texture */}
-        <div
-          className="absolute inset-0 opacity-[0.015]"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
-          }}
-        />
+        <div className="absolute inset-0 opacity-[0.015] noise-texture" />
       </div>
 
       {/* Header with back button */}
@@ -172,7 +163,7 @@ export default function LoginPage() {
               <span className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" aria-hidden="true" />
               {isLoading ? (
                 <span className="flex items-center justify-center gap-3">
-                  <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" role="status" aria-label="Loading" />
+                  <Spinner size="sm" className="border-white/30 border-t-white" />
                   <span>Signing in...</span>
                 </span>
               ) : (
