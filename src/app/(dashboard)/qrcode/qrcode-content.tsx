@@ -108,7 +108,7 @@ export default function QRCodeContent() {
   }
 
   return (
-    <div className="h-full flex flex-col relative overflow-x-hidden">
+    <div className="h-full w-full flex flex-col relative overflow-hidden">
       {/* Layered ambient background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {/* Primary glow behind QR area */}

@@ -78,11 +78,19 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    height: 100%;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+  }
   body {
     @apply bg-background text-foreground;
-    overflow-x: hidden;
-  }
-  html {
-    overflow-x: hidden;
+    height: 100%;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    position: fixed;
+    width: 100%;
   }
 }

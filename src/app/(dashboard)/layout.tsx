@@ -11,7 +11,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <ProtectedRoute>
-      <div className="h-[100dvh] bg-zinc-950 flex flex-col overflow-x-hidden">
+      <div className="h-[100dvh] w-full bg-zinc-950 flex flex-col overflow-hidden fixed inset-0">
         {/* Header with Sign Out - static, doesn't re-render */}
         <header className="relative z-10 px-4 sm:px-5 pt-3 sm:pt-5 pb-2 flex justify-between items-start flex-shrink-0">
           <div>
@@ -35,8 +35,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <span className="text-sm font-medium pointer-events-none">Sign Out</span>
           </button>
         </header>
-        {/* Content area - flex-1 takes remaining space, only scroll when needed */}
-        <div className="flex-1 overflow-hidden">
+        {/* Content area - flex-1 takes remaining space, contained within viewport */}
+        <div className="flex-1 min-h-0 overflow-hidden">
           {children}
         </div>
       </div>
