@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Heart } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
@@ -8,6 +8,20 @@ import { Spinner } from '@/components/ui/spinner';
 import { fetchGymBusyness, fetchGyms, type Gym } from '@/lib/api/basic-fit';
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const FAVORITES_KEY = 'basicshare_favorite_gyms';
+
+function getFavorites(): string[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    return JSON.parse(localStorage.getItem(FAVORITES_KEY) || '[]');
+  } catch {
+    return [];
+  }
+}
+
+function saveFavorites(favorites: string[]) {
+  localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
+}
 
 function getBusynessLevel(percentage: number) {
   if (percentage < 30) return { label: 'Quiet', color: 'text-emerald-400' };
@@ -19,6 +33,7 @@ export default function GymDetailPage() {
   const { slug } = useParams();
   const [gym, setGym] = useState<Gym | null>(null);
   const [loading, setLoading] = useState(true);
+  const [favorites, setFavorites] = useState<string[]>([]);
   const [selectedDay, setSelectedDay] = useState(() => {
     const d = new Date().getDay();
     return d === 0 ? 6 : d - 1;
@@ -32,11 +47,25 @@ export default function GymDetailPage() {
   const currentHour = new Date().getHours();
 
   useEffect(() => {
+    setFavorites(getFavorites());
     fetchGyms().then((gyms) => {
       setGym(gyms.find((g) => g.clubId === slug) || null);
       setLoading(false);
     });
   }, [slug]);
+
+  const toggleFavorite = () => {
+    if (!gym) return;
+    setFavorites((prev) => {
+      const newFavs = prev.includes(gym.clubId)
+        ? prev.filter((id) => id !== gym.clubId)
+        : [...prev, gym.clubId];
+      saveFavorites(newFavs);
+      return newFavs;
+    });
+  };
+
+  const isFavorite = gym ? favorites.includes(gym.clubId) : false;
 
   if (loading) {
     return (
@@ -79,7 +108,20 @@ export default function GymDetailPage() {
 
       {/* Header */}
       <div className="px-6 pb-6">
-        <h1 className="text-2xl font-bold text-white mb-1">{gym.name.replace(/^Basic-Fit\s*/i, '')}</h1>
+        <div className="flex items-start justify-between gap-3">
+          <h1 className="text-2xl font-bold text-white mb-1">{gym.name.replace(/^Basic-Fit\s*/i, '')}</h1>
+          <button
+            type="button"
+            onClick={toggleFavorite}
+            className="p-2 -mr-2 -mt-1"
+          >
+            <Heart
+              className={`w-6 h-6 transition-colors ${
+                isFavorite ? 'fill-orange-500 text-orange-500' : 'text-zinc-600 hover:text-zinc-400'
+              }`}
+            />
+          </button>
+        </div>
         <p className="text-zinc-400 text-sm">{gym.address}, {gym.city}</p>
       </div>
 
