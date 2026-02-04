@@ -27,6 +27,8 @@ export default function PWAInstallPrompt() {
       (window.navigator as unknown as { standalone?: boolean }).standalone === true;
     const dismissed = localStorage.getItem(STORAGE_KEY);
 
+    console.log('[PWA] Mount check:', { isStandalone, dismissed });
+
     if (isStandalone || dismissed) return;
 
     // Detect platform
@@ -34,34 +36,49 @@ export default function PWAInstallPrompt() {
     const isIOS = /iPad|iPhone|iPod/.test(ua);
     const isAndroid = /Android/.test(ua);
 
+    console.log('[PWA] Platform detection:', { ua, isIOS, isAndroid });
+
     if (isIOS) {
       setPlatform('ios');
       // iOS Safari doesn't support beforeinstallprompt
       const isSafari = /Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS/.test(ua);
+      console.log('[PWA] iOS detected, isSafari:', isSafari);
       if (isSafari) {
         setTimeout(() => setShow(true), 1000);
       }
     } else {
-      setPlatform(isAndroid ? 'android' : 'desktop');
+      const detectedPlatform = isAndroid ? 'android' : 'desktop';
+      console.log('[PWA] Platform set to:', detectedPlatform);
+      setPlatform(detectedPlatform);
     }
 
     // Listen for install prompt (Chrome/Edge/Android)
     const handleBeforeInstall = (e: Event) => {
+      console.log('[PWA] beforeinstallprompt event fired!', e);
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
-      setTimeout(() => setShow(true), 1000);
+      setTimeout(() => {
+        console.log('[PWA] Setting show=true after 1s delay');
+        setShow(true);
+      }, 1000);
     };
 
+    console.log('[PWA] Adding beforeinstallprompt listener');
     window.addEventListener('beforeinstallprompt', handleBeforeInstall);
     return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
   }, []);
 
   const handleInstall = async () => {
-    if (!deferredPrompt) return;
+    if (!deferredPrompt) {
+      console.log('[PWA] Install clicked but no deferredPrompt available');
+      return;
+    }
 
     try {
+      console.log('[PWA] Showing install prompt');
       await deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
+      console.log('[PWA] Install outcome:', outcome);
 
       if (outcome === 'accepted') {
         setShow(false);
@@ -69,7 +86,7 @@ export default function PWAInstallPrompt() {
       }
       setDeferredPrompt(null);
     } catch (error) {
-      console.error('Install prompt error:', error);
+      console.error('[PWA] Install prompt error:', error);
     }
   };
 
@@ -79,8 +96,11 @@ export default function PWAInstallPrompt() {
   };
 
   if (!mounted || !show) {
+    console.log('[PWA] Render blocked:', { mounted, show, platform, hasDeferredPrompt: !!deferredPrompt });
     return null;
   }
+
+  console.log('[PWA] Rendering prompt:', { platform, hasDeferredPrompt: !!deferredPrompt });
 
   // iOS Safari - Show instructions
   if (platform === 'ios') {
