@@ -1,35 +1,60 @@
 'use client';
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { fetchGymByClubId, fetchGyms, type Gym } from '@/lib/api/basic-fit';
+import {
+  calculateDistance,
+  fetchGymByClubId,
+  fetchNearbyGymsFromApi,
+  type Gym,
+  type GymWithDistance,
+} from '@/lib/api/basic-fit';
 
 const CACHE_KEY = 'basicshare_gyms_cache';
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
+// Default location (Paris) for users who deny geolocation
+const DEFAULT_LOCATION = { lat: 48.8566, lon: 2.3522 };
+
 interface CacheData {
   data: Gym[];
+  location: { lat: number; lon: number };
   timestamp: number;
 }
 
 interface GymContextValue {
-  gyms: Gym[];
+  gyms: GymWithDistance[];
   loading: boolean;
   error: Error | null;
+  userLocation: { lat: number; lon: number } | null;
   refetch: () => Promise<void>;
 }
 
 const GymContext = createContext<GymContextValue | null>(null);
 
-function getCache(): CacheData | null {
+function getCache(lat: number, lon: number): CacheData | null {
   if (typeof window === 'undefined') return null;
   try {
     const cached = localStorage.getItem(CACHE_KEY);
     if (!cached) return null;
     const parsed = JSON.parse(cached) as CacheData;
+
+    // Check TTL
     if (Date.now() - parsed.timestamp > CACHE_TTL) {
       localStorage.removeItem(CACHE_KEY);
       return null;
     }
+
+    // Check if location is close enough (within 5km of cached location)
+    const distance = Math.sqrt(
+      Math.pow(parsed.location.lat - lat, 2) + Math.pow(parsed.location.lon - lon, 2)
+    ) * 111; // rough km conversion
+
+    if (distance > 5) {
+      // Location changed significantly, invalidate cache
+      localStorage.removeItem(CACHE_KEY);
+      return null;
+    }
+
     return parsed;
   } catch {
     localStorage.removeItem(CACHE_KEY);
@@ -37,38 +62,52 @@ function getCache(): CacheData | null {
   }
 }
 
-function setCache(data: Gym[]) {
+function setCache(data: Gym[], location: { lat: number; lon: number }) {
   try {
-    localStorage.setItem(CACHE_KEY, JSON.stringify({ data, timestamp: Date.now() }));
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ data, location, timestamp: Date.now() }));
   } catch {
     // localStorage quota exceeded - ignore
   }
 }
 
 export function GymProvider({ children }: { children: React.ReactNode }) {
-  const [gyms, setGyms] = useState<Gym[]>([]);
+  const [gyms, setGyms] = useState<GymWithDistance[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
 
-  const loadGyms = useCallback(async (useCache = true) => {
+  const loadGyms = useCallback(async (lat: number, lon: number, useCache = true) => {
     setLoading(true);
     setError(null);
 
     // Check cache first
     if (useCache) {
-      const cached = getCache();
+      const cached = getCache(lat, lon);
       if (cached) {
-        setGyms(cached.data);
+        // Add distance to cached gyms
+        const gymsWithDistance = cached.data.map((gym) => ({
+          ...gym,
+          distance: calculateDistance(lat, lon, gym.latitude, gym.longitude),
+        })).sort((a, b) => a.distance - b.distance);
+
+        setGyms(gymsWithDistance);
         setLoading(false);
         return;
       }
     }
 
-    // Fetch fresh data
+    // Fetch nearby gyms (FAST - only ~30-50 gyms instead of 2000)
     try {
-      const data = await fetchGyms();
-      setGyms(data);
-      setCache(data);
+      const data = await fetchNearbyGymsFromApi(lat, lon, 50, 50);
+
+      // Add distance and sort
+      const gymsWithDistance = data.map((gym) => ({
+        ...gym,
+        distance: calculateDistance(lat, lon, gym.latitude, gym.longitude),
+      })).sort((a, b) => a.distance - b.distance);
+
+      setGyms(gymsWithDistance);
+      setCache(data, { lat, lon });
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Failed to fetch gyms'));
     } finally {
@@ -77,16 +116,34 @@ export function GymProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const refetch = useCallback(async () => {
-    await loadGyms(false);
-  }, [loadGyms]);
+    const loc = userLocation || DEFAULT_LOCATION;
+    await loadGyms(loc.lat, loc.lon, false);
+  }, [loadGyms, userLocation]);
 
+  // Get user location and load gyms
   useEffect(() => {
-    loadGyms();
+    const loadWithLocation = () => {
+      navigator.geolocation?.getCurrentPosition(
+        (pos) => {
+          const loc = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+          setUserLocation(loc);
+          loadGyms(loc.lat, loc.lon);
+        },
+        () => {
+          // Geolocation denied/failed - use default
+          setUserLocation(DEFAULT_LOCATION);
+          loadGyms(DEFAULT_LOCATION.lat, DEFAULT_LOCATION.lon);
+        },
+        { timeout: 5000 }
+      );
+    };
+
+    loadWithLocation();
   }, [loadGyms]);
 
   const value = useMemo(
-    () => ({ gyms, loading, error, refetch }),
-    [gyms, loading, error, refetch]
+    () => ({ gyms, loading, error, userLocation, refetch }),
+    [gyms, loading, error, userLocation, refetch]
   );
 
   return <GymContext.Provider value={value}>{children}</GymContext.Provider>;

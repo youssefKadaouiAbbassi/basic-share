@@ -93,6 +93,31 @@ query GetGymByClubId($clubId: String!) {
 }
 `;
 
+// Contentful GraphQL query for nearby gyms (geo-filtered)
+const NEARBY_GYMS_QUERY = `
+query GetNearbyGyms($lat: Float!, $lon: Float!, $radius: Float!, $limit: Int!) {
+  clubCollection(
+    where: { location_within_circle: { lat: $lat, lon: $lon, radius: $radius } }
+    limit: $limit
+  ) {
+    items {
+      sys { id }
+      clubId
+      name
+      displayName
+      address
+      city
+      country
+      location {
+        lat
+        lon
+      }
+      busynessData
+    }
+  }
+}
+`;
+
 // Fetch all gyms from Contentful
 export async function fetchGyms(): Promise<Gym[]> {
   const response = await fetch(
@@ -122,6 +147,49 @@ export async function fetchGyms(): Promise<Gym[]> {
     clubId: item.clubId,
     name: item.name,
     slug: item.clubId, // Use clubId as slug
+    address: item.address || '',
+    city: item.city || '',
+    country: item.country || '',
+    latitude: item.location?.lat || 0,
+    longitude: item.location?.lon || 0,
+    busynessData: item.busynessData,
+  }));
+}
+
+// Fetch nearby gyms using Contentful geo-filtering (FAST - only fetches ~30 gyms)
+export async function fetchNearbyGymsFromApi(
+  lat: number,
+  lon: number,
+  radiusKm: number = 50,
+  limit: number = 50
+): Promise<Gym[]> {
+  const response = await fetch(
+    `https://graphql.contentful.com/content/v1/spaces/${CONTENTFUL_SPACE_ID}/environments/${CONTENTFUL_ENV}`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${CONTENTFUL_TOKEN}`,
+      },
+      body: JSON.stringify({
+        query: NEARBY_GYMS_QUERY,
+        variables: { lat, lon, radius: radiusKm * 1000, limit }, // radius in meters
+      }),
+    }
+  );
+
+  const data = await response.json();
+
+  if (!data.data?.clubCollection?.items) {
+    console.error('Failed to fetch nearby gyms:', data);
+    return [];
+  }
+
+  return data.data.clubCollection.items.map((item: ContentfulGymItem) => ({
+    id: item.sys.id,
+    clubId: item.clubId,
+    name: item.name,
+    slug: item.clubId,
     address: item.address || '',
     city: item.city || '',
     country: item.country || '',
