@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { QrCode, ArrowLeft } from 'lucide-react';
+import { ArrowLeft, QrCode } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { STORAGE_KEY } from '@/lib/constants';
 
 export default function LoginPage() {
@@ -107,12 +107,8 @@ export default function LoginPage() {
               <span className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent rounded-t-[1.25rem]" />
               <QrCode className="w-8 h-8 text-white" strokeWidth={2.25} />
             </div>
-            <h1 className="text-[28px] font-bold text-white mb-2 tracking-tight">
-              Sign In
-            </h1>
-            <p className="text-zinc-400 text-base font-light">
-              Enter your Basic-Fit card number
-            </p>
+            <h1 className="text-[28px] font-bold text-white mb-2 tracking-tight">Sign In</h1>
+            <p className="text-zinc-400 text-base font-light">Enter your Basic-Fit card number</p>
           </div>
 
           {/* Form */}
@@ -135,9 +131,7 @@ export default function LoginPage() {
               </label>
               <div
                 className={`relative rounded-2xl transition-all duration-200 ${
-                  inputFocused
-                    ? 'ring-2 ring-orange-500/30 ring-offset-2 ring-offset-zinc-950'
-                    : ''
+                  inputFocused ? 'ring-2 ring-orange-500/30 ring-offset-2 ring-offset-zinc-950' : ''
                 }`}
               >
                 <input
