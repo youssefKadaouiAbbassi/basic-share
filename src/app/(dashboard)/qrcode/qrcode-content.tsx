@@ -198,8 +198,8 @@ export default function QRCodeContent() {
               {/* Inner border highlight */}
               <div className="absolute inset-[1px] rounded-[calc(1rem-1px)] sm:rounded-[calc(2rem-1px)] border border-black/5 pointer-events-none" />
 
-              {/* QR Code - Responsive size */}
-              <div className="relative w-full max-w-[240px] sm:max-w-[280px] mx-auto">
+              {/* QR Code */}
+              <div className="relative">
                 {qrData ? (
                   <QRCodeSVG
                     value={qrData}
