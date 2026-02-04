@@ -1,6 +1,6 @@
 'use client';
 
-import { LogOut, Pause, RefreshCw } from 'lucide-react';
+import { Pause, RefreshCw } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { useCallback, useEffect, useState } from 'react';
 import PWAInstallPrompt from '@/components/pwa-install-prompt';
@@ -99,11 +99,6 @@ export default function QRCodeContent() {
     return () => clearInterval(interval);
   }, [isVisible]);
 
-  const handleLogout = () => {
-    localStorage.removeItem(STORAGE_KEY);
-    window.location.href = '/login';
-  };
-
   if (!authData) {
     return (
       <div className="min-h-[100dvh] bg-zinc-950 flex items-center justify-center">
@@ -138,42 +133,6 @@ export default function QRCodeContent() {
           }}
         />
       </div>
-
-      {/* Header */}
-      <header
-        className={`relative z-10 px-4 sm:px-5 pt-3 sm:pt-5 pb-2 flex justify-between items-start transition-all duration-500 flex-shrink-0 ${
-          mounted ? 'opacity-100' : 'opacity-0'
-        }`}
-      >
-        <div>
-          <h1 className="text-lg sm:text-xl font-semibold text-white tracking-tight">
-            Your Gym Pass
-          </h1>
-          <div className="flex items-center gap-1.5 mt-0.5 sm:mt-1">
-            <span
-              className={`w-1.5 h-1.5 rounded-full transition-colors duration-300 ${
-                isVisible ? 'bg-emerald-500' : 'bg-zinc-600'
-              }`}
-            />
-            <p className="text-zinc-500 text-xs sm:text-sm font-medium">
-              {isVisible ? 'Ready to scan' : 'Paused'}
-            </p>
-          </div>
-        </div>
-        <button
-          type="button"
-          onClick={handleLogout}
-          onTouchEnd={(e) => {
-            e.preventDefault();
-            handleLogout();
-          }}
-          className="relative z-20 flex items-center gap-2 text-zinc-500 hover:text-white active:text-zinc-300 px-4 py-3 rounded-xl min-h-[48px] bg-zinc-900/50 border border-zinc-800 select-none"
-          style={{ touchAction: 'manipulation' }}
-        >
-          <LogOut className="w-5 h-5 pointer-events-none" strokeWidth={2} />
-          <span className="text-sm font-medium pointer-events-none">Sign Out</span>
-        </button>
-      </header>
 
       {/* Main content - QR Code Hero */}
       <main className="relative z-10 flex-1 flex flex-col items-center px-4 sm:px-6 py-4 sm:py-8">
