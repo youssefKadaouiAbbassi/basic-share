@@ -92,13 +92,9 @@ export default function GymDetailPage() {
   const isFavorite = gym ? favorites.includes(gym.clubId) : false;
   const isDefault = gym ? defaultGym === gym.clubId : false;
 
-  // Show loading message instead of spinner
+  // Show nothing while loading - prefetch should have data ready
   if (loading && !gym) {
-    return (
-      <div className="h-full flex items-center justify-center">
-        <p className="text-zinc-500 text-sm">Loading gym details...</p>
-      </div>
-    );
+    return null;
   }
 
   if (!gym) {
