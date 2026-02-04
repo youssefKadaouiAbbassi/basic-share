@@ -18,6 +18,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <h1 className="text-lg sm:text-xl font-semibold text-white tracking-tight">
               Your Gym Pass
             </h1>
+            <div className="flex items-center gap-1.5 mt-0.5 sm:mt-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              <p className="text-zinc-500 text-xs sm:text-sm font-medium">
+                Ready to scan
+              </p>
+            </div>
           </div>
           <button
             type="button"
