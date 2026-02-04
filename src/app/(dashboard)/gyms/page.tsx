@@ -2,6 +2,7 @@
 
 import { Heart } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { OfflineBanner } from '@/components/ui/offline-banner';
 import { Spinner } from '@/components/ui/spinner';
 import {
@@ -226,10 +227,14 @@ function GymsListContent() {
 
 // Wrapper component that checks for default gym before rendering list
 export default function GymsPage() {
+  const searchParams = useSearchParams();
   const [defaultGym] = useState(() => getDefaultGymSync());
 
-  // If there's a default gym, just show spinner and redirect
-  if (defaultGym) {
+  // Check if user explicitly wants to see the list
+  const showList = searchParams.get('list') === 'true';
+
+  // If there's a default gym AND user didn't explicitly request the list, redirect
+  if (defaultGym && !showList) {
     return <RedirectToDefaultGym gymId={defaultGym} />;
   }
 

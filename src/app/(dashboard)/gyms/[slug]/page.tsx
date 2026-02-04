@@ -129,7 +129,7 @@ export default function GymDetailPage() {
       <OfflineBanner />
       {/* Back */}
       <div className="px-6 pt-6 pb-3">
-        <a href="/gyms" className="inline-flex items-center gap-1.5 text-zinc-400 hover:text-white text-sm transition-colors">
+        <a href="/gyms?list=true" className="inline-flex items-center gap-1.5 text-zinc-400 hover:text-white text-sm transition-colors">
           <ArrowLeft className="w-4 h-4" />
           Back
         </a>
