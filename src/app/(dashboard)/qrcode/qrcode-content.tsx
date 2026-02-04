@@ -7,6 +7,7 @@ import PWAInstallPrompt from '@/components/pwa-install-prompt';
 import { STORAGE_KEY } from '@/lib/constants';
 
 const REFRESH_INTERVAL = 5000; // 5 seconds
+const TOTAL_CYCLES = 6; // 6 cycles × 5s = 30s total
 
 interface AuthData {
   cardNumber: string;
@@ -32,6 +33,20 @@ function generateQRData(cardNumber: string, deviceId: string, guid: string): str
 }
 
 export default function QRCodeContent() {
+  // Inject CSS animation for progress bar
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes progress-fill {
+        from { width: 0%; }
+        to { width: 100%; }
+      }
+    `;
+    document.head.appendChild(style);
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
   const [authData] = useState<AuthData | null>(() => {
     if (typeof window === 'undefined') return null;
     const stored = localStorage.getItem(STORAGE_KEY);
@@ -45,9 +60,9 @@ export default function QRCodeContent() {
   });
 
   const [qrData, setQrData] = useState('');
-  const [progress, setProgress] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
   const [mounted, setMounted] = useState(false);
+  const [animationKey, setAnimationKey] = useState(0);
 
   useEffect(() => {
     setMounted(true);
@@ -75,7 +90,7 @@ export default function QRCodeContent() {
     if (!authData) return;
     const qr = generateQRData(authData.cardNumber, authData.deviceId, authData.persistentGuid);
     setQrData(qr);
-    setProgress(0);
+    setAnimationKey((prev) => prev + 1);
   }, [authData]);
 
   // QR generation - only when visible
@@ -88,16 +103,6 @@ export default function QRCodeContent() {
     const interval = setInterval(generate, REFRESH_INTERVAL);
     return () => clearInterval(interval);
   }, [authData, isVisible, generate]);
-
-  // Progress bar - only when visible
-  useEffect(() => {
-    if (!isVisible) return;
-
-    const interval = setInterval(() => {
-      setProgress((p) => (p >= 100 ? 0 : p + 2));
-    }, 100);
-    return () => clearInterval(interval);
-  }, [isVisible]);
 
   if (!authData) {
     return (
@@ -217,10 +222,12 @@ export default function QRCodeContent() {
             {/* Progress bar */}
             <div className="h-1 bg-zinc-900/80 rounded-full overflow-hidden">
               <div
-                className="h-full rounded-full transition-all duration-100 ease-linear"
+                key={animationKey}
+                className="h-full rounded-full"
                 style={{
-                  width: `${progress}%`,
+                  width: '0%',
                   background: 'linear-gradient(90deg, #ea580c 0%, #f97316 50%, #fb923c 100%)',
+                  animation: isVisible ? 'progress-fill 5s linear forwards' : 'none',
                 }}
               />
             </div>

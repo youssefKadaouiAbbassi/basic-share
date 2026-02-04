@@ -87,9 +87,10 @@ export default function LoginPage() {
       >
         <a
           href="/"
-          className="inline-flex items-center gap-1.5 text-zinc-500 hover:text-white active:text-zinc-300 transition-colors py-2 pr-4 -ml-1 min-h-[44px]"
+          aria-label="Go back to home page"
+          className="inline-flex items-center gap-1.5 text-zinc-500 hover:text-white active:text-zinc-300 transition-colors py-2 pr-4 -ml-1 min-h-[44px] rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-600 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950"
         >
-          <ArrowLeft className="w-5 h-5" strokeWidth={2.25} />
+          <ArrowLeft className="w-5 h-5" strokeWidth={2.25} aria-hidden="true" />
           <span className="text-[15px] font-medium">Back</span>
         </a>
       </header>
@@ -103,9 +104,9 @@ export default function LoginPage() {
         >
           {/* Logo and header */}
           <div className="mb-10 text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-[1.25rem] bg-gradient-to-b from-orange-500 to-orange-600 mb-6 shadow-lg shadow-orange-500/20 relative">
-              <span className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent rounded-t-[1.25rem]" />
-              <QrCode className="w-8 h-8 text-white" strokeWidth={2.25} />
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-[1.25rem] bg-gradient-to-b from-orange-500 to-orange-600 mb-6 shadow-lg shadow-orange-500/20 relative" role="img" aria-label="BasicShare logo">
+              <span className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent rounded-t-[1.25rem]" aria-hidden="true" />
+              <QrCode className="w-8 h-8 text-white" strokeWidth={2.25} aria-hidden="true" />
             </div>
             <h1 className="text-[28px] font-bold text-white mb-2 tracking-tight">Sign In</h1>
             <p className="text-zinc-400 text-base font-light">Enter your Basic-Fit card number</p>
@@ -118,6 +119,8 @@ export default function LoginPage() {
               className={`overflow-hidden transition-all duration-300 ease-out ${
                 error ? 'max-h-20 opacity-100' : 'max-h-0 opacity-0'
               }`}
+              role="alert"
+              aria-live="assertive"
             >
               <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/20">
                 <p className="text-red-400 text-sm text-center font-medium">{error}</p>
@@ -147,10 +150,13 @@ export default function LoginPage() {
                   disabled={isLoading}
                   autoFocus
                   autoComplete="off"
+                  aria-label="Card number"
+                  aria-invalid={error ? 'true' : 'false'}
+                  aria-describedby={error ? 'card-error' : 'card-hint'}
                   className="w-full px-5 py-4 rounded-2xl bg-zinc-900/80 border border-zinc-800 text-white text-lg placeholder-zinc-600 focus:outline-none focus:bg-zinc-900 focus:border-orange-500/50 transition-colors disabled:opacity-50"
                 />
               </div>
-              <p className="text-zinc-600 text-xs pl-1 leading-relaxed">
+              <p id="card-hint" className="text-zinc-600 text-xs pl-1 leading-relaxed">
                 Located on your membership card or in the Basic-Fit app
               </p>
             </div>
@@ -159,13 +165,14 @@ export default function LoginPage() {
             <button
               type="button"
               onClick={handleSubmit}
-              disabled={isLoading}
-              className="w-full py-[18px] px-6 rounded-2xl bg-gradient-to-b from-orange-500 to-orange-600 text-white font-semibold text-[17px] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-orange-500/25 active:scale-[0.98] hover:shadow-xl hover:shadow-orange-500/30 relative overflow-hidden mt-2"
+              disabled={isLoading || !cardNumber.trim()}
+              aria-label="Continue to generate QR code"
+              className="w-full py-[18px] px-6 rounded-2xl bg-gradient-to-b from-orange-500 to-orange-600 text-white font-semibold text-[17px] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-orange-500/25 active:scale-[0.98] hover:shadow-xl hover:shadow-orange-500/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 relative overflow-hidden mt-2"
             >
-              <span className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" />
+              <span className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" aria-hidden="true" />
               {isLoading ? (
                 <span className="flex items-center justify-center gap-3">
-                  <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" role="status" aria-label="Loading" />
                   <span>Signing in...</span>
                 </span>
               ) : (
@@ -175,7 +182,7 @@ export default function LoginPage() {
           </div>
 
           {/* Footer hint */}
-          <p className="mt-10 text-zinc-600 text-xs text-center font-medium">
+          <p className="mt-10 text-zinc-600 text-xs text-center font-medium" role="status" aria-live="polite">
             Your information stays on this device
           </p>
         </div>

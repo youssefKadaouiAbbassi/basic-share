@@ -85,6 +85,7 @@
     padding: 0;
     overscroll-behavior: none;
     -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
   }
   body {
     @apply bg-background text-foreground;
@@ -95,5 +96,32 @@
     width: 100%;
     overscroll-behavior: none;
     /* NO position: fixed - it breaks iOS PWA standalone mode! */
+  }
+
+  /* Enhanced focus visibility for keyboard navigation */
+  *:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
+  /* Reduced motion for users who prefer it */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+    html {
+      scroll-behavior: auto;
+    }
+  }
+
+  /* High contrast mode improvements */
+  @media (prefers-contrast: high) {
+    * {
+      outline-width: 3px;
+    }
   }
 }

@@ -1,23 +1,38 @@
 {
   "compilerOptions": {
+    // ECMAScript target for modern browser support
     "target": "ES2017",
     "lib": ["dom", "dom.iterable", "esnext"],
+
+    // JavaScript and type checking
     "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "noEmit": true,
+    "skipLibCheck": true, // Skip lib checks for faster builds (safe for this project size)
+    "strict": true, // Enable all strict type-checking options
+
+    // Emit behavior
+    "noEmit": true, // Next.js handles compilation
+
+    // Module resolution
     "esModuleInterop": true,
     "module": "esnext",
-    "moduleResolution": "bundler",
+    "moduleResolution": "bundler", // Optimized for modern bundlers
     "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "react-jsx",
-    "incremental": true,
+    "isolatedModules": true, // Required for transpilers like Babel
+
+    // React configuration
+    "jsx": "react-jsx", // Modern JSX transform
+
+    // Performance
+    "incremental": true, // Faster subsequent builds
+
+    // Next.js integration
     "plugins": [
       {
         "name": "next"
       }
     ],
+
+    // Path aliases for cleaner imports
     "paths": {
       "@/*": ["./src/*"]
     }
