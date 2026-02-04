@@ -13,20 +13,20 @@ interface AuthData {
   persistentGuid: string;
 }
 
-function generateHash(cardNumber: string, guid: string, time: number, deviceId: string): string {
+async function generateHash(cardNumber: string, guid: string, time: number, deviceId: string): Promise<string> {
   const input = `${cardNumber}${guid}${time}${deviceId}`;
-  let hash = 0;
-  for (let i = 0; i < input.length; i++) {
-    const char = input.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash = hash & hash;
-  }
-  return Math.abs(hash).toString(16).toUpperCase().padStart(8, '0').slice(-8);
+  const encoder = new TextEncoder();
+  const data = encoder.encode(input);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  // Return last 8 characters uppercase (matches reference implementation)
+  return hashHex.slice(-8).toUpperCase();
 }
 
-function generateQRData(cardNumber: string, deviceId: string, guid: string): string {
+async function generateQRData(cardNumber: string, deviceId: string, guid: string): Promise<string> {
   const time = Math.floor(Date.now() / 1000);
-  const hash = generateHash(cardNumber, guid, time, deviceId);
+  const hash = await generateHash(cardNumber, guid, time, deviceId);
   return `GM2:${cardNumber}:${guid}:${time}:${hash}`;
 }
 
@@ -70,9 +70,9 @@ export default function QRCodeContent() {
   }, [authData]);
 
   // Generate QR code function
-  const generate = useCallback(() => {
+  const generate = useCallback(async () => {
     if (!authData) return;
-    const qr = generateQRData(authData.cardNumber, authData.deviceId, authData.persistentGuid);
+    const qr = await generateQRData(authData.cardNumber, authData.deviceId, authData.persistentGuid);
     setQrData(qr);
     setAnimationKey((prev) => prev + 1);
   }, [authData]);
